@@ -1,0 +1,49 @@
+{% assign block_id = 'statistic-' | append: block.id %}
+
+<div 
+  id="{{ block_id }}"
+  class="statistic-item 
+    {% if section.settings.layout == 'horizontal' %}statistic-item--horizontal{% else %}statistic-item--vertical{% endif %}
+    {% if section.settings.text_alignment %}text-{{ section.settings.text_alignment }}{% endif %}"
+  {{ block.shopify_attributes }}
+>
+  <!-- Top Border -->
+  <div class="statistic-border"></div>
+  
+  <!-- Content -->
+  <div class="statistic-content">
+    {% if block.settings.primary_text != blank %}
+      <div class="statistic-primary">
+        {{ block.settings.primary_text }}
+      </div>
+    {% endif %}
+    
+    {% if block.settings.secondary_text != blank %}
+      <div class="statistic-secondary">
+        {{ block.settings.secondary_text }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Statistic Item",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "primary_text",
+      "label": "Primary Text",
+      "default": "<p><strong>2.6+ million</strong></p>",
+      "info": "Main statistic or number"
+    },
+    {
+      "type": "richtext", 
+      "id": "secondary_text",
+      "label": "Secondary Text",
+      "default": "<p>meals donated to children in Palestine</p>",
+      "info": "Description or context"
+    }
+  ]
+}
+{% endschema %}

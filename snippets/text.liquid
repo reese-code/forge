@@ -131,6 +131,94 @@
   .custom-color > :is(h1, h2, h3, h4, h5, h6, p, *) {
     color: var(--color);
   }
+
+  /* Fill text sizing - scales to fit container width */
+  .text-fill-container {
+    --fill-min-size: 2rem;
+    --fill-max-size: 20vw;
+    --fill-preferred-size: 8vw;
+  }
+
+  .text-fill-container > * {
+    font-size: clamp(var(--fill-min-size), var(--fill-preferred-size), var(--fill-max-size)) !important;
+    line-height: 0.9 !important;
+    text-wrap: nowrap !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Responsive adjustments for fill text */
+  @media screen and (max-width: 768px) {
+    .text-fill-container {
+      --fill-min-size: 1.5rem;
+      --fill-max-size: 15vw;
+      --fill-preferred-size: 12vw;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .text-fill-container {
+      --fill-min-size: 1.25rem;
+      --fill-max-size: 12vw;
+      --fill-preferred-size: 10vw;
+    }
+  }
+
+  /* For better scaling on larger screens */
+  @media screen and (min-width: 1200px) {
+    .text-fill-container {
+      --fill-max-size: 240px;
+    }
+  }
+
+  /* Screen Width text sizing - scales to fit screen width with better control */
+  .text-screen-width {
+    --screen-min-size: 2.5rem;
+    --screen-max-size: min(25vw, 300px);
+    --screen-preferred-size: 10vw;
+  }
+
+  .text-screen-width > * {
+    font-size: clamp(var(--screen-min-size), var(--screen-preferred-size), var(--screen-max-size)) !important;
+    line-height: 0.85 !important;
+    text-wrap: balance !important;
+    width: 100% !important;
+    display: block !important;
+    word-spacing: -0.1em !important;
+  }
+
+  /* Responsive adjustments for screen width text */
+  @media screen and (max-width: 1024px) {
+    .text-screen-width {
+      --screen-min-size: 2rem;
+      --screen-max-size: min(20vw, 250px);
+      --screen-preferred-size: 12vw;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .text-screen-width {
+      --screen-min-size: 1.75rem;
+      --screen-max-size: min(18vw, 200px);
+      --screen-preferred-size: 14vw;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .text-screen-width {
+      --screen-min-size: 1.5rem;
+      --screen-max-size: min(16vw, 150px);
+      --screen-preferred-size: 16vw;
+    }
+  }
+
+  /* For very large screens */
+  @media screen and (min-width: 1400px) {
+    .text-screen-width {
+      --screen-max-size: 350px;
+    }
+  }
 {% endstylesheet %}
 
 {% liquid
@@ -157,7 +245,11 @@
     endif
     if block.settings.type_preset == 'custom'
       echo ' custom-typography '
-      if block.settings.font_size != ''
+      if block.settings.font_size == 'fill'
+        echo ' text-fill-container '
+      elsif block.settings.font_size == 'screen-width'
+        echo ' text-screen-width '
+      elsif block.settings.font_size != ''
         echo ' custom-font-size '
       endif
       if block.settings.color != ''

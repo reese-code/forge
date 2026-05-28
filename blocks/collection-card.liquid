@@ -68,7 +68,30 @@
           "value": "below_image",
           "label": "t:options.below_image"
         }
-      ]
+      ],
+      "default": "below_image"
+    },
+    {
+      "type": "select",
+      "id": "gradient_style",
+      "label": "Gradient style",
+      "options": [
+        {
+          "value": "none",
+          "label": "No gradient"
+        },
+        {
+          "value": "light",
+          "label": "Light (black gradient, light text)"
+        },
+        {
+          "value": "dark",
+          "label": "Dark (white gradient, dark text)"
+        }
+      ],
+      "default": "none",
+      "info": "Add gradient overlay on image for better text readability",
+      "visible_if": "{{ block.settings.placement == 'on_image' }}"
     },
     {
       "type": "select",
@@ -109,7 +132,7 @@
         }
       ],
       "default": "center",
-      "visible_if": "{{ block.settings.placement == \"on_image\" }}"
+      "visible_if": "{{ block.settings.placement == 'on_image' }}"
     },
     {
       "type": "range",
@@ -129,14 +152,15 @@
       "type": "checkbox",
       "id": "inherit_color_scheme",
       "label": "t:settings.inherit_color_scheme",
-      "default": true
+      "default": true,
+      "visible_if": "{{ block.settings.gradient_style == 'none' }}"
     },
     {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1",
-      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+      "visible_if": "{{ block.settings.inherit_color_scheme == false and block.settings.gradient_style == 'none' }}"
     },
     {
       "type": "select",

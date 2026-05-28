@@ -12,12 +12,12 @@ class CarouselDrag {
     this.isResetting = false;
     this.isHovered = false;
     
-    // Add transition class for smooth reset
+    // Add transition class for smooth dragging only
     this.track.classList.add('carousel-track');
     const style = document.createElement('style');
     style.textContent = `
-      .carousel-track { transition: transform 0.3s ease-out; }
-      .carousel-track.no-transition { transition: none; }
+      .carousel-track { transition: none; }
+      .carousel-track.smooth-transition { transition: transform 0.3s ease-out; }
     `;
     document.head.appendChild(style);
     
@@ -46,11 +46,15 @@ class CarouselDrag {
   }
 
   calculateTrackWidth() {
-    const firstSet = Array.from(this.track.children).slice(0, this.track.children.length / 2);
+    // Calculate width of one set of testimonials (1/6th of total for 6 copies)
+    const oneSet = Array.from(this.track.children).slice(0, this.track.children.length / 6);
     const gap = parseFloat(window.getComputedStyle(this.track).gap) || 0;
-    this.trackWidth = firstSet.reduce((width, child, index) => {
-      return width + child.offsetWidth + (index < firstSet.length - 1 ? gap : 0);
+    this.oneSetWidth = oneSet.reduce((width, child, index) => {
+      return width + child.offsetWidth + (index < oneSet.length - 1 ? gap : 0);
     }, 0);
+    
+    // Reset after 2 sets (33% of total 6 sets)
+    this.resetDistance = this.oneSetWidth * 2 + 10;
   }
 
   addEventListeners() {
@@ -131,11 +135,7 @@ class CarouselDrag {
   }
 
   updateTransform(isDragging = false) {
-    if (isDragging) {
-      this.track.classList.add('no-transition');
-    } else {
-      this.track.classList.remove('no-transition');
-    }
+    // No transitions needed since we set default to none
     this.track.style.transform = `translateX(${this.currentX}px)`;
   }
 
@@ -153,15 +153,13 @@ class CarouselDrag {
         this.currentX -= this.animationSpeed * deltaTime / 16;
       }
       
-      // Reset position when scrolled one set width
-      if (Math.abs(this.currentX) >= this.trackWidth) {
+      // Reset position when scrolled 2 sets (33% of 6 total sets)
+      if (Math.abs(this.currentX) >= this.resetDistance) {
         this.isResetting = true;
-        requestAnimationFrame(() => {
-          this.track.classList.add('no-transition');
-          this.currentX = 0;
-          this.updateTransform();
-          this.isResetting = false;
-        });
+        // Instant reset with no transition
+        this.currentX = 0;
+        this.updateTransform();
+        this.isResetting = false;
       }
       
       this.updateTransform();

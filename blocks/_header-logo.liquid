@@ -3,6 +3,16 @@
 {% liquid
   assign use_inverse_logo = false
 
+  # Check for adaptive headers that need inverse logos
+  if section.settings.enable_header_adaptability_home and template.name == 'index' and section.settings.header_adaptability_style_home == 'scroll-based'
+    assign use_inverse_logo = true
+  elsif section.settings.enable_header_adaptability_product and template.name == 'product' and section.settings.header_adaptability_style_product == 'scroll-based'
+    assign use_inverse_logo = true
+  elsif section.settings.enable_header_adaptability_collection and template.name == 'collection' and section.settings.header_adaptability_style_collection == 'scroll-based'
+    assign use_inverse_logo = true
+  endif
+  
+  # Also check for old transparent header logic for backward compatibility
   if section.settings.enable_transparent_header_home and template.name == 'index' and section.settings.home_color_scheme == 'inverse'
     assign use_inverse_logo = true
   elsif section.settings.enable_transparent_header_product and template.name == 'product' and section.settings.product_color_scheme == 'inverse'

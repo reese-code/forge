@@ -164,6 +164,7 @@
     
     <div class="v2-testimonials__marquee">
       <div class="v2-testimonials__track tw-justify-center tw-items-center">
+        {%- comment -%} Copy 1 {%- endcomment -%}
         {%- for block in section.blocks -%}
           <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" {{ block.shopify_attributes }}>
             <div class="v2-testimonials__content v2-border">
@@ -193,6 +194,127 @@
           </div>
         {%- endfor -%}
         
+        {%- comment -%} Copy 2 {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" aria-hidden="true">
+            <div class="v2-testimonials__content v2-border">
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 600 | image_tag:
+                  loading: 'lazy',
+                  class: 'v2-testimonials__background-image',
+                  alt: ''
+                }}
+              {%- endif -%}
+              
+              <div class="v2-testimonials__profile">
+                {%- if block.settings.profile_image != blank -%}
+                  {{ block.settings.profile_image | image_url: width: 100 | image_tag:
+                    loading: 'lazy',
+                    class: 'v2-testimonials__profile-image',
+                    alt: ''
+                  }}
+                {%- endif -%}
+                {%- if block.settings.instagram_handle != blank -%}
+                  <a href="https://www.instagram.com/{{ block.settings.instagram_handle }}" target="_blank" rel="noopener" class="v2-testimonials__handle">@{{ block.settings.instagram_handle }}</a>
+                {%- endif -%}
+              </div>
+              
+              <p class="v2-testimonials__quote">{{ block.settings.quote }}</p>
+            </div>
+          </div>
+        {%- endfor -%}
+        
+        {%- comment -%} Copy 3 {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" aria-hidden="true">
+            <div class="v2-testimonials__content v2-border">
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 600 | image_tag:
+                  loading: 'lazy',
+                  class: 'v2-testimonials__background-image',
+                  alt: ''
+                }}
+              {%- endif -%}
+              
+              <div class="v2-testimonials__profile">
+                {%- if block.settings.profile_image != blank -%}
+                  {{ block.settings.profile_image | image_url: width: 100 | image_tag:
+                    loading: 'lazy',
+                    class: 'v2-testimonials__profile-image',
+                    alt: ''
+                  }}
+                {%- endif -%}
+                {%- if block.settings.instagram_handle != blank -%}
+                  <a href="https://www.instagram.com/{{ block.settings.instagram_handle }}" target="_blank" rel="noopener" class="v2-testimonials__handle">@{{ block.settings.instagram_handle }}</a>
+                {%- endif -%}
+              </div>
+              
+              <p class="v2-testimonials__quote">{{ block.settings.quote }}</p>
+            </div>
+          </div>
+        {%- endfor -%}
+        
+        {%- comment -%} Copy 4 {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" aria-hidden="true">
+            <div class="v2-testimonials__content v2-border">
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 600 | image_tag:
+                  loading: 'lazy',
+                  class: 'v2-testimonials__background-image',
+                  alt: ''
+                }}
+              {%- endif -%}
+              
+              <div class="v2-testimonials__profile">
+                {%- if block.settings.profile_image != blank -%}
+                  {{ block.settings.profile_image | image_url: width: 100 | image_tag:
+                    loading: 'lazy',
+                    class: 'v2-testimonials__profile-image',
+                    alt: ''
+                  }}
+                {%- endif -%}
+                {%- if block.settings.instagram_handle != blank -%}
+                  <a href="https://www.instagram.com/{{ block.settings.instagram_handle }}" target="_blank" rel="noopener" class="v2-testimonials__handle">@{{ block.settings.instagram_handle }}</a>
+                {%- endif -%}
+              </div>
+              
+              <p class="v2-testimonials__quote">{{ block.settings.quote }}</p>
+            </div>
+          </div>
+        {%- endfor -%}
+        
+        {%- comment -%} Copy 5 {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" aria-hidden="true">
+            <div class="v2-testimonials__content v2-border">
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 600 | image_tag:
+                  loading: 'lazy',
+                  class: 'v2-testimonials__background-image',
+                  alt: ''
+                }}
+              {%- endif -%}
+              
+              <div class="v2-testimonials__profile">
+                {%- if block.settings.profile_image != blank -%}
+                  {{ block.settings.profile_image | image_url: width: 100 | image_tag:
+                    loading: 'lazy',
+                    class: 'v2-testimonials__profile-image',
+                    alt: ''
+                  }}
+                {%- endif -%}
+                {%- if block.settings.instagram_handle != blank -%}
+                  <a href="https://www.instagram.com/{{ block.settings.instagram_handle }}" target="_blank" rel="noopener" class="v2-testimonials__handle">@{{ block.settings.instagram_handle }}</a>
+                {%- endif -%}
+              </div>
+              
+              <p class="v2-testimonials__quote">{{ block.settings.quote }}</p>
+            </div>
+          </div>
+        {%- endfor -%}
+        
+        {%- comment -%} Copy 6 {%- endcomment -%}
         {%- for block in section.blocks -%}
           <div class="v2-testimonials__card v2-testimonials__card--{{ block.settings.size }}" aria-hidden="true">
             <div class="v2-testimonials__content v2-border">

@@ -18,6 +18,12 @@
     background-color: transparent;
   }
 
+  /* Vertical Layout */
+  .email-signup__input-group--vertical {
+    grid-template-columns: 1fr;
+    gap: var(--gap-xs);
+  }
+
   .email-signup__input-group:not(:has(.email-signup__button--integrated)) {
     gap: var(--gap-xs);
   }
@@ -28,12 +34,31 @@
     }
   }
 
+  /* Vertical layout button full width */
+  .email-signup__input-group--vertical .email-signup__button {
+    width: 100%;
+  }
+
+  .email-signup__title {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
   .email-signup__input {
     width: 100%;
     border-width: var(--border-width);
     border-radius: var(--border-radius);
     border-style: solid;
-    border-color: var(--color-input-border);
+    border-color: var(--custom-input-border-color, var(--color-input-border));
+    background-color: var(--custom-input-background-color, var(--color-input-background));
+    color: var(--custom-input-text-color, var(--color-input-text));
+  }
+
+  /* Transparent background option */
+  .email-signup__input--transparent-bg {
+    background-color: transparent !important;
   }
 
   .email-signup__button {
@@ -187,9 +212,19 @@
   {{ block.shopify_attributes }}
 >
   {%- form 'customer', class: 'email-signup__form spacing-style' %}
+    {%- if block.settings.title != blank -%}
+      <{{ block.settings.title_size }} class="email-signup__title {{ block.settings.title_size }}">{{ block.settings.title }}</{{ block.settings.title_size }}>
+    {%- endif -%}
+    
     <div
-      class="email-signup__input-group {% if block.settings.inherit_color_scheme == false %}color-{{ block.settings.color_scheme }}{% endif %}"
-      style="--border-width: {{ block.settings.border_width }}px; --border-radius: {{ block.settings.border_radius }}px;"
+      class="email-signup__input-group email-signup__input-group--{{ block.settings.layout }} {% if block.settings.inherit_color_scheme == false %}color-{{ block.settings.color_scheme }}{% endif %}"
+      style="
+        --border-width: {{ block.settings.border_width }}px; 
+        --border-radius: {{ block.settings.border_radius }}px;
+        {% if block.settings.custom_border_color != blank %}--custom-input-border-color: {{ block.settings.custom_border_color }};{% endif %}
+        {% if block.settings.custom_input_background_color != blank %}--custom-input-background-color: {{ block.settings.custom_input_background_color }};{% endif %}
+        {% if block.settings.custom_input_text_color != blank %}--custom-input-text-color: {{ block.settings.custom_input_text_color }};{% endif %}
+      "
     >
       <label
         for="EmailInput-{{ block.id }}"
@@ -282,6 +317,62 @@
       "content": "t:content.email_signups_create_customer_profiles"
     },
     {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Get the latest updates",
+      "info": "Optional title that appears above the form"
+    },
+    {
+      "type": "select",
+      "id": "title_size",
+      "label": "Title Size",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1 (Largest)"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6 (Smallest)"
+        }
+      ],
+      "default": "h2",
+      "visible_if": "{{ block.settings.title != blank }}"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "Horizontal (input and button side-by-side)"
+        },
+        {
+          "value": "vertical",
+          "label": "Vertical (button below input, full width)"
+        }
+      ],
+      "default": "horizontal"
+    },
+    {
       "type": "select",
       "id": "width",
       "label": "t:settings.width",
@@ -289,6 +380,10 @@
         {
           "value": "fill",
           "label": "t:options.fill"
+        },
+        {
+          "value": "fit",
+          "label": "Fit Content"
         },
         {
           "value": "custom",
@@ -366,6 +461,25 @@
       "unit": "px",
       "default": 100,
       "visible_if": "{{ block.settings.border_style != \"underline\" }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_border_color",
+      "label": "Border Color",
+      "info": "Override the default border color",
+      "visible_if": "{{ block.settings.border_style != \"none\" }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_input_background_color",
+      "label": "Background Color",
+      "info": "Leave empty for transparent background"
+    },
+    {
+      "type": "color",
+      "id": "custom_input_text_color",
+      "label": "Text Color",
+      "info": "Override the default text color"
     },
     {
       "type": "select",

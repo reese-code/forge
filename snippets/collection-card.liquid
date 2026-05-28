@@ -109,6 +109,59 @@
     width: 100%;
   }
 
+  /* Collection Card Gradient Styles */
+  .collection-card--gradient-light .collection-card__content::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .collection-card--gradient-dark .collection-card__content::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .collection-card--gradient-light .collection-card__content {
+    position: relative;
+    z-index: 10;
+    color: #ffffff;
+    --color-foreground: #ffffff;
+    --color-foreground-heading: #ffffff;
+  }
+
+  .collection-card--gradient-light .collection-card__content * {
+    color: #ffffff !important;
+    position: relative;
+    z-index: 10;
+  }
+
+  .collection-card--gradient-dark .collection-card__content {
+    position: relative;
+    z-index: 10;
+    color: #000000;
+    --color-foreground: #000000;
+    --color-foreground-heading: #000000;
+  }
+
+  .collection-card--gradient-dark .collection-card__content * {
+    color: #000000 !important;
+    position: relative;
+    z-index: 10;
+  }
+
   .collection-list:not(.hidden--desktop) .collection-card--flexible-aspect-ratio {
     &.collection-card.collection-card--image-bg,
     &.collection-card .placeholder-svg {
@@ -152,7 +205,9 @@
     {% if block.settings.placement == 'on_image' %}collection-card--image-bg{% endif %}
     {% if section.settings.layout_type == 'bento' %}collection-card--image-height-fixed{% endif %}
     {% if section.settings.layout_type == 'editorial' %}collection-card--flexible-aspect-ratio{% endif %}
-    {% if block.settings.inherit_color_scheme == false %} color-{{ block.settings.color_scheme }}{% endif %}
+    {% if block.settings.inherit_color_scheme == false and block.settings.gradient_style == 'none' %} color-{{ block.settings.color_scheme }}{% endif %}
+    {% if block.settings.gradient_style == 'light' %}collection-card--gradient-light{% endif %}
+    {% if block.settings.gradient_style == 'dark' %}collection-card--gradient-dark{% endif %}
   "
   data-block-id="{{ block.id }}"
   style="

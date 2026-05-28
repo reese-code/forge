@@ -1,0 +1,551 @@
+{% stylesheet %}
+  .image-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--image-gallery-gap-vertical);
+  }
+
+  .image-gallery__top-row {
+    display: grid;
+    gap: var(--image-gallery-gap-horizontal);
+    grid-template-columns: 1fr;
+  }
+
+  .image-gallery__bottom-row {
+    display: grid;
+    gap: var(--image-gallery-gap-horizontal);
+    grid-template-columns: 1fr;
+  }
+
+  /* Mobile: All images stack vertically */
+  @media screen and (max-width: 749px) {
+    .image-gallery__top-row,
+    .image-gallery__bottom-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Desktop layouts */
+  @media screen and (min-width: 750px) {
+    /* Top row: 2/3 and 1/3 layout */
+    .image-gallery__top-row {
+      grid-template-columns: 2fr 1fr;
+    }
+    
+    /* Bottom row: 3 equal columns */
+    .image-gallery__bottom-row {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+
+  .image-gallery__image {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Top row first image (2/3 width) - landscape */
+  .image-gallery__top-row .image-gallery__image:first-child {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Top row second image (1/3 width) - height fill */
+  .image-gallery__top-row .image-gallery__image:last-child {
+    height: 100%;
+    aspect-ratio: unset;
+  }
+
+  /* Bottom row images - portrait */
+  .image-gallery__bottom-row .image-gallery__image {
+    aspect-ratio: 4 / 5;
+  }
+
+  .image-gallery__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .image-gallery__image:hover img {
+    transform: scale(1.05);
+  }
+
+  .image-gallery__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-foreground), 0.04);
+    color: rgba(var(--color-foreground), 0.75);
+    min-height: 300px;
+  }
+
+  /* Placeholder aspect ratios match their containers */
+  .image-gallery__top-row .image-gallery__placeholder {
+    aspect-ratio: 16 / 9;
+  }
+
+  .image-gallery__top-row .image-gallery__image:last-child .image-gallery__placeholder {
+    aspect-ratio: unset;
+    height: 100%;
+  }
+
+  .image-gallery__bottom-row .image-gallery__placeholder {
+    aspect-ratio: 4 / 5;
+  }
+
+  .image-gallery__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+{% endstylesheet %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--{{ section.settings.section_width }} image-gallery-section color-{{ section.settings.color_scheme }} spacing-style"
+  style="
+    {%- render 'spacing-style', settings: section.settings %}
+    {% render 'border-override', settings: section.settings %}
+    --image-gallery-gap-horizontal: {{ section.settings.gap_horizontal }}px;
+    --image-gallery-gap-vertical: {{ section.settings.gap_vertical }}px;
+  "
+>
+  <div class="image-gallery">
+    {% if section.settings.enable_bottom_row and section.settings.switch_order %}
+      <!-- When switched: Bottom Row First: 3 images (portrait, equal width) -->
+      <div class="image-gallery__bottom-row">
+        <!-- Third Image -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_3 %}
+            {% if section.settings.image_3_link != blank %}
+              <a href="{{ section.settings.image_3_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_3
+              | image_url: width: 600
+              | image_tag:
+                widths: '300, 450, 600, 750',
+                sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                alt: section.settings.image_3.alt | default: 'Image 3'
+            }}
+            {% if section.settings.image_3_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Fourth Image -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_4 %}
+            {% if section.settings.image_4_link != blank %}
+              <a href="{{ section.settings.image_4_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_4
+              | image_url: width: 600
+              | image_tag:
+                widths: '300, 450, 600, 750',
+                sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                alt: section.settings.image_4.alt | default: 'Image 4'
+            }}
+            {% if section.settings.image_4_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Fifth Image -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_5 %}
+            {% if section.settings.image_5_link != blank %}
+              <a href="{{ section.settings.image_5_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_5
+              | image_url: width: 600
+              | image_tag:
+                widths: '300, 450, 600, 750',
+                sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                alt: section.settings.image_5.alt | default: 'Image 5'
+            }}
+            {% if section.settings.image_5_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- When switched: Top Row Second: 2 images (2/3 and 1/3 width) -->
+      <div class="image-gallery__top-row">
+        <!-- First Image (2/3 width) -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_1 %}
+            {% if section.settings.image_1_link != blank %}
+              <a href="{{ section.settings.image_1_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_1
+              | image_url: width: 1200
+              | image_tag:
+                widths: '300, 450, 600, 750, 900, 1050, 1200, 1350, 1500',
+                sizes: 'auto, (min-width: 750px) 67vw, 100vw',
+                alt: section.settings.image_1.alt | default: 'Image 1'
+            }}
+            {% if section.settings.image_1_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Second Image (1/3 width) -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_2 %}
+            {% if section.settings.image_2_link != blank %}
+              <a href="{{ section.settings.image_2_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_2
+              | image_url: width: 600
+              | image_tag:
+                widths: '300, 450, 600, 750',
+                sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                alt: section.settings.image_2.alt | default: 'Image 2'
+            }}
+            {% if section.settings.image_2_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <!-- Normal Order: Top Row First: 2 images (2/3 and 1/3 width) -->
+      <div class="image-gallery__top-row">
+        <!-- First Image (2/3 width) -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_1 %}
+            {% if section.settings.image_1_link != blank %}
+              <a href="{{ section.settings.image_1_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_1
+              | image_url: width: 1200
+              | image_tag:
+                widths: '300, 450, 600, 750, 900, 1050, 1200, 1350, 1500',
+                sizes: 'auto, (min-width: 750px) 67vw, 100vw',
+                alt: section.settings.image_1.alt | default: 'Image 1'
+            }}
+            {% if section.settings.image_1_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Second Image (1/3 width) -->
+        <div class="image-gallery__image">
+          {% if section.settings.image_2 %}
+            {% if section.settings.image_2_link != blank %}
+              <a href="{{ section.settings.image_2_link }}" class="image-gallery__link">
+            {% endif %}
+            {{
+              section.settings.image_2
+              | image_url: width: 600
+              | image_tag:
+                widths: '300, 450, 600, 750',
+                sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                alt: section.settings.image_2.alt | default: 'Image 2'
+            }}
+            {% if section.settings.image_2_link != blank %}
+              </a>
+            {% endif %}
+          {% else %}
+            <div class="image-gallery__placeholder">
+              <span>Add Image</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bottom Row: 3 images (equal width, conditional) -->
+      {% if section.settings.enable_bottom_row %}
+        <div class="image-gallery__bottom-row">
+          <!-- Third Image -->
+          <div class="image-gallery__image">
+            {% if section.settings.image_3 %}
+              {% if section.settings.image_3_link != blank %}
+                <a href="{{ section.settings.image_3_link }}" class="image-gallery__link">
+              {% endif %}
+              {{
+                section.settings.image_3
+                | image_url: width: 600
+                | image_tag:
+                  widths: '300, 450, 600, 750',
+                  sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                  alt: section.settings.image_3.alt | default: 'Image 3'
+              }}
+              {% if section.settings.image_3_link != blank %}
+                </a>
+              {% endif %}
+            {% else %}
+              <div class="image-gallery__placeholder">
+                <span>Add Image</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Fourth Image -->
+          <div class="image-gallery__image">
+            {% if section.settings.image_4 %}
+              {% if section.settings.image_4_link != blank %}
+                <a href="{{ section.settings.image_4_link }}" class="image-gallery__link">
+              {% endif %}
+              {{
+                section.settings.image_4
+                | image_url: width: 600
+                | image_tag:
+                  widths: '300, 450, 600, 750',
+                  sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                  alt: section.settings.image_4.alt | default: 'Image 4'
+              }}
+              {% if section.settings.image_4_link != blank %}
+                </a>
+              {% endif %}
+            {% else %}
+              <div class="image-gallery__placeholder">
+                <span>Add Image</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Fifth Image -->
+          <div class="image-gallery__image">
+            {% if section.settings.image_5 %}
+              {% if section.settings.image_5_link != blank %}
+                <a href="{{ section.settings.image_5_link }}" class="image-gallery__link">
+              {% endif %}
+              {{
+                section.settings.image_5
+                | image_url: width: 600
+                | image_tag:
+                  widths: '300, 450, 600, 750',
+                  sizes: 'auto, (min-width: 750px) 33vw, 100vw',
+                  alt: section.settings.image_5.alt | default: 'Image 5'
+              }}
+              {% if section.settings.image_5_link != blank %}
+                </a>
+              {% endif %}
+            {% else %}
+              <div class="image-gallery__placeholder">
+                <span>Add Image</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Image Gallery",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_row",
+      "label": "Enable bottom row (5 images total)",
+      "default": false,
+      "info": "When enabled, displays 2 images on top (2/3 and 1/3 width) and 3 equal images below. When disabled, displays only the top 2 images."
+    },
+    {
+      "type": "checkbox",
+      "id": "switch_order",
+      "label": "Switch order",
+      "default": false,
+      "info": "When enabled, places the 3 portrait images on top and the 2 images below.",
+      "visible_if": "{{ section.settings.enable_bottom_row == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "gap_horizontal",
+      "label": "Horizontal gap between images",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "gap_vertical",
+      "label": "Vertical gap between images",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "First image"
+    },
+    {
+      "type": "url",
+      "id": "image_1_link",
+      "label": "First image link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Second image"
+    },
+    {
+      "type": "url",
+      "id": "image_2_link",
+      "label": "Second image link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Third image",
+      "info": "Only visible when 'Enable bottom row' is checked"
+    },
+    {
+      "type": "url",
+      "id": "image_3_link",
+      "label": "Third image link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Fourth image",
+      "info": "Only visible when 'Enable bottom row' is checked"
+    },
+    {
+      "type": "url",
+      "id": "image_4_link",
+      "label": "Fourth image link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Fifth image",
+      "info": "Only visible when 'Enable bottom row' is checked"
+    },
+    {
+      "type": "url",
+      "id": "image_5_link",
+      "label": "Fifth image link"
+    },
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Gallery - 2 Images",
+      "category": "Image",
+      "settings": {
+        "enable_bottom_row": false,
+        "gap_horizontal": 20,
+        "gap_vertical": 20
+      }
+    },
+    {
+      "name": "Image Gallery - 5 Images",
+      "category": "Image",
+      "settings": {
+        "enable_bottom_row": true,
+        "gap_horizontal": 20,
+        "gap_vertical": 20
+      }
+    }
+  ]
+}
+{% endschema %}

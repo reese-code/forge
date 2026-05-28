@@ -1,0 +1,543 @@
+{% assign section_id = 'statistics-' | append: section.id %}
+
+<section 
+  id="{{ section_id }}" 
+  class="statistics-section"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --border-thickness: {{ section.settings.border_thickness }}px;
+    --grid-gap-horizontal: {{ section.settings.grid_gap_horizontal }}px;
+    --grid-gap-vertical: {{ section.settings.grid_gap_vertical }}px;
+  "
+>
+  <div class="statistics-container">
+    {% if section.settings.heading != blank %}
+      <div class="statistics-heading text-{{ section.settings.heading_alignment }}">
+        <h2 class="h2">{{ section.settings.heading }}</h2>
+      </div>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <div class="statistics-grid 
+        statistics-grid--{{ section.settings.layout }}
+        statistics-grid--{{ section.settings.grid_columns }}-cols
+        statistics-grid--align-{{ section.settings.content_alignment }}
+        statistics-grid--width-{{ section.settings.card_width }}
+        text-{{ section.settings.text_alignment }}
+      ">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'statistic_item' %}
+              {% render 'statistic-item', block: block, section: section %}
+          {% endcase %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .statistics-section {
+    padding-top: var(--section-padding-top);
+    padding-bottom: var(--section-padding-bottom);
+  }
+
+  .statistics-heading {
+    margin-bottom: 2rem;
+  }
+
+  .statistics-grid {
+    display: grid;
+    column-gap: var(--grid-gap-horizontal, 2rem);
+    row-gap: var(--grid-gap-vertical, 2rem);
+  }
+
+  /* Grid Column Layouts */
+  .statistics-grid--1-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .statistics-grid--2-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .statistics-grid--3-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .statistics-grid--4-cols {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tablet and up */
+  @media (min-width: 768px) {
+    .statistics-grid--2-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .statistics-grid--3-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .statistics-grid--4-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Desktop and up */
+  @media (min-width: 1024px) {
+    .statistics-grid--3-cols {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .statistics-grid--4-cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Content Alignment */
+  .statistics-grid--align-start {
+    justify-items: start;
+  }
+
+  .statistics-grid--align-center {
+    justify-items: center;
+  }
+
+  .statistics-grid--align-end {
+    justify-items: end;
+  }
+
+  /* Statistic Item Styles */
+  .statistic-item {
+    width: 100%;
+  }
+
+  /* Width Options */
+  .statistics-grid--width-fit .statistic-item {
+    max-width: 400px;
+  }
+
+  .statistics-grid--width-fill .statistic-item {
+    max-width: none;
+  }
+
+  .statistic-border {
+    height: var(--border-thickness, 2px);
+    background-color: var(--color-foreground);
+    margin-bottom: 1rem;
+  }
+
+  .statistic-content {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Vertical Layout (Default) */
+  .statistic-item--vertical .statistic-content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Horizontal Layout */
+  .statistic-item--horizontal .statistic-content {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+
+  .statistic-primary {
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .statistic-secondary {
+    font-size: 1rem;
+    line-height: 1.4;
+    opacity: 0.8;
+  }
+
+  /* Horizontal layout adjustments */
+  .statistic-item--horizontal .statistic-primary {
+    margin-right: 0.5rem;
+  }
+
+  /* Responsive typography */
+  @media (min-width: 768px) {
+    .statistic-primary {
+      font-size: 2rem;
+    }
+
+    .statistic-secondary {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* Text alignment utilities */
+  .text-left {
+    text-align: left;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  {% if section.settings.animate_numbers %}
+    if (window.gsap && window.ScrollTrigger) {
+      // Function to extract and animate numbers
+      function animateStatistics() {
+        const statisticItems = document.querySelectorAll('#{{ section_id }} .statistic-primary');
+        
+        statisticItems.forEach((item, index) => {
+          const originalHTML = item.innerHTML;
+          const textContent = item.textContent || item.innerText;
+          
+          // Extract numbers including decimals and commas
+          const numberMatch = textContent.match(/[\d,]+\.?\d*/);
+          if (!numberMatch) return;
+          
+          const numberStr = numberMatch[0];
+          const targetNumber = parseFloat(numberStr.replace(/,/g, ''));
+          
+          // Check if it's a valid number
+          if (isNaN(targetNumber)) return;
+          
+          // Store formatting info
+          const hasCommas = numberStr.includes(',');
+          const decimalPlaces = numberStr.includes('.') ? numberStr.split('.')[1].length : 0;
+          const prefix = textContent.substring(0, textContent.indexOf(numberStr));
+          const suffix = textContent.substring(textContent.indexOf(numberStr) + numberStr.length);
+          
+          // Create counter object
+          const counter = { value: 0 };
+          
+          // Create the animation
+          gsap.fromTo(counter, 
+            { value: 0 },
+            {
+              value: targetNumber,
+              duration: 2,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 80%",
+                once: true
+              },
+              onUpdate: function() {
+                let currentValue = counter.value;
+                
+                // Format the number
+                if (decimalPlaces > 0) {
+                  currentValue = currentValue.toFixed(decimalPlaces);
+                } else {
+                  currentValue = Math.round(currentValue);
+                }
+                
+                // Add commas if original had them
+                if (hasCommas) {
+                  currentValue = currentValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                
+                // Update the content while preserving HTML structure
+                const newContent = originalHTML.replace(numberStr, currentValue);
+                item.innerHTML = newContent;
+              },
+              onComplete: function() {
+                // Ensure final value matches exactly
+                item.innerHTML = originalHTML;
+              }
+            }
+          );
+        });
+      }
+      
+      // Initialize animations
+      animateStatistics();
+      
+      // Re-initialize on Shopify theme editor changes
+      document.addEventListener('shopify:section:load', function(e) {
+        if (e.detail.sectionId === '{{ section.id }}') {
+          setTimeout(animateStatistics, 100);
+        }
+      });
+    }
+  {% endif %}
+});
+</script>
+
+{% schema %}
+{
+  "name": "Statistics",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Impact"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Statistics Layout",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical (Number above description)"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal (Number beside description)"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "select",
+      "id": "grid_columns",
+      "label": "Desktop Columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 Column"
+        },
+        {
+          "value": "2",
+          "label": "2 Columns"
+        },
+        {
+          "value": "3",
+          "label": "3 Columns"
+        },
+        {
+          "value": "4",
+          "label": "4 Columns"
+        }
+      ],
+      "default": "2",
+      "info": "Mobile is always 1 column, tablet shows up to 2 columns"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content Alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "card_width",
+      "label": "Card Width",
+      "options": [
+        {
+          "value": "fit",
+          "label": "Fit Content"
+        },
+        {
+          "value": "fill",
+          "label": "Fill Space"
+        }
+      ],
+      "default": "fit",
+      "info": "Fit: Cards size to content, Fill: Cards fill available grid space"
+    },
+    {
+      "type": "header",
+      "content": "Grid Spacing"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal Gap",
+      "default": 32,
+      "info": "Space between columns"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Vertical Gap",
+      "default": 32,
+      "info": "Space between rows"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "animate_numbers",
+      "label": "Animate Numbers",
+      "default": true,
+      "info": "Numbers will count up from 0 when section comes into view"
+    },
+    {
+      "type": "header",
+      "content": "Border"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px", 
+      "label": "Bottom Padding",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "statistic_item",
+      "name": "Statistic",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "primary_text",
+          "label": "Primary Text",
+          "default": "<p><strong>2.6+ million</strong></p>",
+          "info": "Main statistic or number (use <strong> tags for bold)"
+        },
+        {
+          "type": "color",
+          "id": "primary_text_color",
+          "label": "Primary Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "richtext",
+          "id": "secondary_text", 
+          "label": "Secondary Text",
+          "default": "<p>meals donated to children in Palestine</p>",
+          "info": "Description or context"
+        },
+        {
+          "type": "color",
+          "id": "secondary_text_color",
+          "label": "Secondary Text Color",
+          "default": "#666666"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Statistics",
+      "blocks": [
+        {
+          "type": "statistic_item",
+          "settings": {
+            "primary_text": "<p><strong>2.6+ million</strong></p>",
+            "secondary_text": "<p>meals donated to children in Palestine</p>"
+          }
+        },
+        {
+          "type": "statistic_item", 
+          "settings": {
+            "primary_text": "<p><strong>$3.4 million</strong></p>",
+            "secondary_text": "<p>raised for vital community projects</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

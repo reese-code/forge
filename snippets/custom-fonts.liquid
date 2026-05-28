@@ -1,0 +1,56 @@
+<!-- Custom Fonts CSS Variables -->
+<style>
+  :root {
+    /* Custom font variables */
+    {% if settings.custom_font_body == 'pp_playground' %}
+      --custom-font-body: 'PP Playground', var(--font-paragraph--family);
+    {% elsif settings.custom_font_body == 'white_oleander' %}
+      --custom-font-body: 'White Oleander', var(--font-paragraph--family);
+    {% else %}
+      --custom-font-body: var(--font-paragraph--family);
+    {% endif %}
+    
+    {% if settings.custom_font_headings == 'pp_playground' %}
+      --custom-font-headings: 'PP Playground', var(--font-heading--family);
+    {% elsif settings.custom_font_headings == 'white_oleander' %}
+      --custom-font-headings: 'White Oleander', var(--font-heading--family);
+    {% else %}
+      --custom-font-headings: var(--font-heading--family);
+    {% endif %}
+  }
+  
+  /* Apply custom fonts when selected */
+  {% if settings.custom_font_body != 'default' %}
+  .custom-font-body,
+  .custom-font-body * {
+    font-family: var(--custom-font-body) !important;
+  }
+  {% endif %}
+  
+  {% if settings.custom_font_headings != 'default' %}
+  .custom-font-headings,
+  .custom-font-headings h1,
+  .custom-font-headings h2,
+  .custom-font-headings h3,
+  .custom-font-headings h4,
+  .custom-font-headings h5,
+  .custom-font-headings h6,
+  .custom-font-headings .h1,
+  .custom-font-headings .h2,
+  .custom-font-headings .h3,
+  .custom-font-headings .h4,
+  .custom-font-headings .h5,
+  .custom-font-headings .h6 {
+    font-family: var(--custom-font-headings) !important;
+  }
+  {% endif %}
+  
+  /* Utility classes for direct font application */
+  .font-pp-playground {
+    font-family: 'PP Playground', var(--font-paragraph--family) !important;
+  }
+  
+  .font-white-oleander {
+    font-family: 'White Oleander', var(--font-paragraph--family) !important;
+  }
+</style>

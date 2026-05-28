@@ -1,3 +1,20 @@
+/* Custom Fonts */
+@font-face {
+  font-family: 'PP Playground';
+  src: url('PPPlayground-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'White Oleander';
+  src: url('WhiteOleander.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Reset styles inspired by https://www.joshwcomeau.com/css/custom-css-reset/ */
 * {
   box-sizing: border-box;

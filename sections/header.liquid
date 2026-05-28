@@ -14,33 +14,10 @@
     assign search_style = 'modal'
   endif
 
-  if section.settings.enable_transparent_header_home and template.name == 'index'
-    assign transparent = 'always'
-    assign transparent_color_scheme = section.settings.home_color_scheme
-  elsif section.settings.enable_transparent_header_product and template.name == 'product'
-    assign transparent = 'always'
-    assign transparent_color_scheme = section.settings.product_color_scheme
-  elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
-    assign transparent = 'always'
-    assign transparent_color_scheme = section.settings.collection_color_scheme
-  endif
-
   if section.settings.enable_sticky_header == 'always'
     assign sticky = 'always'
   elsif section.settings.enable_sticky_header == 'scroll-up'
     assign sticky = 'scroll-up'
-  endif
-
-  if transparent and sticky
-    assign transparent = 'not-sticky'
-  endif
-
-  if transparent
-    if transparent_color_scheme == 'inverse'
-      assign transparent_color_scheme = 'color-' | append: section.settings.color_scheme_transparent
-    else
-      assign transparent_color_scheme = 'color-' | append: section.settings.color_scheme_top
-    endif
   endif
 
   capture logo
@@ -56,7 +33,7 @@
   endcapture
 
   capture navigation_bar
-    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar', transparent: transparent
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar'
   endcapture
 
   capture actions
@@ -139,10 +116,6 @@
 
   assign class = 'header'
 
-  if transparent_color_scheme
-    assign class = class | append: ' ' | append: transparent_color_scheme
-  endif
-
   if section.settings.color_scheme_top.settings.background.alpha != 1
     assign class = class | append: ' ' | append: 'header--inherit-color-scheme-on-menu-open'
   endif
@@ -153,6 +126,18 @@
 
   if collapse_header_paddings_class
     assign class = class | append: ' ' | append: collapse_header_paddings_class
+  endif
+
+  # PALIROOTS 2: Configure header styles based on page type
+  # Home page gets adaptive (scroll-based) version
+  # All other pages get gradient (non-adaptive) version
+  
+  if template.name == 'index'
+    # Home page: Use adaptive scroll-based header
+    assign class = class | append: ' header--adaptive header--scroll-adaptive'
+  else
+    # All other pages: Use gradient header (non-adaptive)
+    assign class = class | append: ' header--gradient-static'
   endif
 %}
 
@@ -171,9 +156,6 @@
 <header-component
   id="header-component"
   class="{{ class }}"
-  {% if transparent %}
-    transparent="{{ transparent }}"
-  {% endif %}
   {% if sticky %}
     sticky="{{ sticky }}"
   {% endif %}
@@ -379,7 +361,166 @@
     position: relative;
     /* will default to bg from its color scheme unless --header-bg-color is transparent */
     background-color: var(--header-bg-color, var(--color-background));
-  /* UPDATE HERE CLINE */
+  }
+
+  /* Header Adaptability Styles */
+  .header--adaptive {
+    transition: all 0.4s ease;
+    /* Position adaptive headers above hero without creating gaps */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--layer-overlay);
+  }
+  
+  /* Ensure content flows naturally without header gap */
+  .header-section:has(.header--adaptive) + .shopify-section {
+    margin-top: 0;
+  }
+  
+  /* Remove any section offsets for adaptive headers */
+  body:has(> #header-group .header--adaptive) > main > .shopify-section:first-child .section:not(.disable-section-top-offset) {
+    &.spacing-style,
+    .spacing-style {
+      --section-top-offset: 0px;
+    }
+  }
+
+  /* Smooth transitions for all adaptive header elements */
+  .header--adaptive .header__row {
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+
+  .header--adaptive .header__row *,
+  .header--adaptive .header-logo * {
+    transition: color 0.4s ease;
+  }
+
+  /* Logo transition for smooth switching between versions */
+  .header--adaptive .header-logo__original,
+  .header--adaptive .header-logo__inverse {
+    transition: opacity 0.4s ease;
+  }
+
+  /* Only transition logo SVGs */
+  .header--adaptive .header-logo svg {
+    transition: fill 0.4s ease;
+  }
+
+  /* Gradient background option */
+  .header--gradient {
+    /* Show default logo for gradient headers */
+    --header-logo-display: block;
+    --header-logo-inverse-display: none;
+  }
+  
+  .header--gradient .header__row {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+    
+    /* Force dark/default colorings */
+    --color-foreground: #000000;
+    --color-foreground-heading: #000000;
+    color: #000000;
+  }
+
+  .header--gradient .header__row *,
+  .header--gradient .header-logo * {
+    color: #000000 !important;
+  }
+
+  .header--gradient .header-logo svg {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  /* Scroll-based adaptive header */
+  .header--scroll-adaptive .header__row {
+    transition: all 0.3s ease;
+  }
+
+  /* Default state: light colors for hero overlay - show inverse logo */
+  .header--scroll-adaptive {
+    --header-logo-display: none;
+    --header-logo-inverse-display: block;
+  }
+  
+  .header--scroll-adaptive .header__row {
+    --color-foreground: #ffffff;
+    --color-foreground-heading: #ffffff;
+    color: #ffffff;
+    background-color: transparent;
+  }
+
+  .header--scroll-adaptive .header__row *,
+  .header--scroll-adaptive .header-logo * {
+    color: #ffffff !important;
+  }
+
+  /* Only style logo SVGs, leave UI icons alone */
+  .header--scroll-adaptive .header-logo svg {
+    fill: #ffffff !important;
+  }
+
+  /* Scrolled state: dark colors with gradient background - show default logo */
+  .header--scroll-adaptive.header--scrolled {
+    --header-logo-display: block;
+    --header-logo-inverse-display: none;
+  }
+  
+  .header--scroll-adaptive.header--scrolled .header__row {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+    
+    --color-foreground: #000000;
+    --color-foreground-heading: #000000;
+    color: #000000;
+  }
+
+  .header--scroll-adaptive.header--scrolled .header__row *,
+  .header--scroll-adaptive.header--scrolled .header-logo * {
+    color: #000000 !important;
+  }
+
+  .header--scroll-adaptive.header--scrolled .header-logo svg {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  /* PALIROOTS 2: Static gradient header for non-home pages */
+  .header--gradient-static {
+    /* Use normal document flow positioning */
+    position: relative;
+    /* Show default logo for gradient headers */
+    --header-logo-display: block;
+    --header-logo-inverse-display: none;
+  }
+  
+  .header--gradient-static .header__row {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+    
+    /* Force dark/default colorings */
+    --color-foreground: #000000;
+    --color-foreground-heading: #000000;
+    color: #000000;
+  }
+
+  .header--gradient-static .header__row *,
+  .header--gradient-static .header-logo * {
+    color: #000000 !important;
+  }
+
+  .header--gradient-static .header-logo svg {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  /* Remove all hover effects for adaptive headers */
+  .header--adaptive .header__row:hover,
+  .header--adaptive .header__row:has(.header-menu[aria-expanded='true']),
+  .header--adaptive .header__row:has(.menu-list__link[data-animating]),
+  .header--adaptive .header__row:has(.account-popover[open]),
+  .header--adaptive .header__row:has(.localization-wrapper:not([hidden])) {
+    /* Disable hover color changes */
   }
 
   .header__row--top:not(.divider--page-width),
@@ -864,38 +1005,32 @@
       "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
     },
     {
-      "type": "color_scheme",
-      "id": "color_scheme_transparent",
-      "label": "t:settings.inverse",
-      "default": "primary",
-      "visible_if": "{{ section.settings.enable_transparent_header_home or section.settings.enable_transparent_header_product or section.settings.enable_transparent_header_collection }}"
-    },
-    {
       "type": "header",
       "content": "t:content.home_page"
     },
     {
       "type": "checkbox",
-      "id": "enable_transparent_header_home",
-      "label": "t:settings.transparent_background",
-      "default": false
+      "id": "enable_header_adaptability_home",
+      "label": "Enable adaptive header",
+      "default": false,
+      "info": "Choose between gradient background or scroll-based color changes"
     },
     {
       "type": "select",
-      "id": "home_color_scheme",
-      "label": "t:settings.color_scheme",
+      "id": "header_adaptability_style_home",
+      "label": "Adaptability style",
       "options": [
         {
-          "value": "default",
-          "label": "t:options.default"
+          "value": "gradient",
+          "label": "Gradient background with dark text"
         },
         {
-          "value": "inverse",
-          "label": "t:options.inverse"
+          "value": "scroll-based",
+          "label": "Light colors over hero, dark after scrolling"
         }
       ],
-      "default": "default",
-      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
+      "default": "gradient",
+      "visible_if": "{{ section.settings.enable_header_adaptability_home }}"
     },
     {
       "type": "header",
@@ -903,26 +1038,27 @@
     },
     {
       "type": "checkbox",
-      "id": "enable_transparent_header_product",
-      "label": "t:settings.transparent_background",
-      "default": false
+      "id": "enable_header_adaptability_product",
+      "label": "Enable adaptive header",
+      "default": false,
+      "info": "Choose between gradient background or scroll-based color changes"
     },
     {
       "type": "select",
-      "id": "product_color_scheme",
-      "label": "t:settings.color_scheme",
+      "id": "header_adaptability_style_product",
+      "label": "Adaptability style",
       "options": [
         {
-          "value": "default",
-          "label": "t:options.default"
+          "value": "gradient",
+          "label": "Gradient background with dark text"
         },
         {
-          "value": "inverse",
-          "label": "t:options.inverse"
+          "value": "scroll-based",
+          "label": "Light colors over hero, dark after scrolling"
         }
       ],
-      "default": "default",
-      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
+      "default": "gradient",
+      "visible_if": "{{ section.settings.enable_header_adaptability_product }}"
     },
     {
       "type": "header",
@@ -930,26 +1066,27 @@
     },
     {
       "type": "checkbox",
-      "id": "enable_transparent_header_collection",
-      "label": "t:settings.transparent_background",
-      "default": false
+      "id": "enable_header_adaptability_collection",
+      "label": "Enable adaptive header",
+      "default": false,
+      "info": "Choose between gradient background or scroll-based color changes"
     },
     {
       "type": "select",
-      "id": "collection_color_scheme",
-      "label": "t:settings.color_scheme",
+      "id": "header_adaptability_style_collection",
+      "label": "Adaptability style",
       "options": [
         {
-          "value": "default",
-          "label": "t:options.default"
+          "value": "gradient",
+          "label": "Gradient background with dark text"
         },
         {
-          "value": "inverse",
-          "label": "t:options.inverse"
+          "value": "scroll-based",
+          "label": "Light colors over hero, dark after scrolling"
         }
       ],
-      "default": "default",
-      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+      "default": "gradient",
+      "visible_if": "{{ section.settings.enable_header_adaptability_collection }}"
     }
   ],
   "presets": []

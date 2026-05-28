@@ -126,10 +126,14 @@ class HeaderComponent extends Component {
 
   #handleWindowScroll = () => {
     const stickyMode = this.getAttribute('sticky');
-    if (!this.#offscreen && stickyMode !== 'always') return;
-
     const scrollTop = document.scrollingElement?.scrollTop ?? 0;
     const isScrollingUp = scrollTop < this.#lastScrollTop;
+
+    // Handle adaptive header scroll detection
+    this.#handleAdaptiveHeaderScroll(scrollTop);
+
+    if (!this.#offscreen && stickyMode !== 'always') return;
+
     if (this.#timeout) {
       clearTimeout(this.#timeout);
       this.#timeout = null;
@@ -180,18 +184,48 @@ class HeaderComponent extends Component {
     this.#lastScrollTop = scrollTop;
   };
 
+  /**
+   * Handle adaptive header scroll behavior
+   * @param {number} scrollTop - Current scroll position
+   */
+  #handleAdaptiveHeaderScroll = (scrollTop) => {
+    // Only run if header has adaptive class and is scroll-based
+    if (!this.classList.contains('header--adaptive') || !this.classList.contains('header--scroll-adaptive')) return;
+
+    // Find hero section (first section after header)
+    const firstSection = document.querySelector('main .shopify-section:first-child');
+    if (!firstSection || !(firstSection instanceof HTMLElement)) return;
+
+    // Get the bottom of the hero section 
+    const heroBottom = firstSection.offsetTop + firstSection.offsetHeight;
+    
+    // Add scrolled class when hero bottom reaches top of screen
+    if (scrollTop >= heroBottom) {
+      this.classList.add('header--scrolled');
+    } else {
+      this.classList.remove('header--scrolled');
+    }
+  };
+
   connectedCallback() {
     super.connectedCallback();
     this.#resizeObserver.observe(this);
     this.addEventListener('overflowMinimum', this.#handleOverflowMinimum);
 
     const stickyMode = this.getAttribute('sticky');
+    const isAdaptive = this.classList.contains('header--adaptive');
+    
     if (stickyMode) {
       this.#observeStickyPosition(stickyMode === 'always');
 
       if (stickyMode === 'scroll-up' || stickyMode === 'always') {
         document.addEventListener('scroll', this.#handleWindowScroll);
       }
+    }
+
+    // Add scroll listener for adaptive headers even without sticky behavior
+    if (isAdaptive && !stickyMode) {
+      document.addEventListener('scroll', this.#handleWindowScroll);
     }
   }
 
@@ -209,13 +243,35 @@ if (!customElements.get('header-component')) {
   customElements.define('header-component', HeaderComponent);
 }
 
+/**
+ * Calculate and update header group height
+ * @param {HTMLElement | null} header - The header element
+ * @param {HTMLElement} headerGroup - The header group element
+ */
+function calculateHeaderGroupHeight(header, headerGroup) {
+  if (!header || !headerGroup) return;
+  
+  let totalHeight = 0;
+  const children = headerGroup.children;
+  
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+    if (child instanceof HTMLElement) {
+      totalHeight += child.offsetHeight;
+    }
+  }
+  
+  document.body.style.setProperty('--header-group-height', `${totalHeight}px`);
+}
+
 onDocumentReady(() => {
   const header = document.querySelector('#header-component');
   const headerGroup = document.querySelector('#header-group');
 
   // Update header group height on resize of any child
-  if (headerGroup) {
-    const resizeObserver = new ResizeObserver(() => calculateHeaderGroupHeight(header, headerGroup));
+  if (headerGroup && headerGroup instanceof HTMLElement) {
+    const headerElement = header instanceof HTMLElement ? header : null;
+    const resizeObserver = new ResizeObserver(() => calculateHeaderGroupHeight(headerElement, headerGroup));
 
     // Observe all children of the header group
     const children = headerGroup.children;

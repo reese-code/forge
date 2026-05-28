@@ -33,7 +33,7 @@
         endif
       endunless
     %}
-    {%- if settings.font_size != blank -%}
+    {%- if settings.font_size != blank and settings.font_size != 'fill' and settings.font_size != 'screen-width' -%}
       --font-size: {{ settings.font_size }};
     {%- endif -%}
     {%- if settings.weight != blank -%}

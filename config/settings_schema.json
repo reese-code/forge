@@ -349,6 +349,50 @@
       },
       {
         "type": "header",
+        "content": "Custom Fonts"
+      },
+      {
+        "type": "select",
+        "id": "custom_font_body",
+        "label": "Custom Body Font",
+        "options": [
+          {
+            "value": "default",
+            "label": "Use Main Body Font"
+          },
+          {
+            "value": "pp_playground",
+            "label": "PP Playground"
+          },
+          {
+            "value": "white_oleander",
+            "label": "White Oleander"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "select",
+        "id": "custom_font_headings",
+        "label": "Custom Heading Font",
+        "options": [
+          {
+            "value": "default",
+            "label": "Use Main Heading Font"
+          },
+          {
+            "value": "pp_playground",
+            "label": "PP Playground"
+          },
+          {
+            "value": "white_oleander",
+            "label": "White Oleander"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "header",
         "content": "t:content.text_presets"
       },
       {
