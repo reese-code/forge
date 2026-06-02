@@ -1,16 +1,16 @@
 /* Custom Fonts */
 @font-face {
-  font-family: 'PP Playground';
-  src: url('PPPlayground-Medium.otf') format('opentype');
+  font-family: 'Neue Montreal';
+  src: url('neuemontreal-medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'White Oleander';
-  src: url('WhiteOleander.otf') format('opentype');
-  font-weight: normal;
+  font-family: 'PP Neue Machina';
+  src: url('PPNeueMachina-PlainUltrabold.otf') format('opentype');
+  font-weight: 800;
   font-style: normal;
   font-display: swap;
 }

@@ -361,15 +361,15 @@
             "label": "Use Main Body Font"
           },
           {
-            "value": "pp_playground",
-            "label": "PP Playground"
+            "value": "neue_montreal",
+            "label": "Neue Montreal"
           },
           {
-            "value": "white_oleander",
-            "label": "White Oleander"
+            "value": "pp_neue_machina",
+            "label": "PP Neue Machina"
           }
         ],
-        "default": "default"
+        "default": "neue_montreal"
       },
       {
         "type": "select",
@@ -381,15 +381,15 @@
             "label": "Use Main Heading Font"
           },
           {
-            "value": "pp_playground",
-            "label": "PP Playground"
+            "value": "neue_montreal",
+            "label": "Neue Montreal"
           },
           {
-            "value": "white_oleander",
-            "label": "White Oleander"
+            "value": "pp_neue_machina",
+            "label": "PP Neue Machina"
           }
         ],
-        "default": "default"
+        "default": "pp_neue_machina"
       },
       {
         "type": "header",

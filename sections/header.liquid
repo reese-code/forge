@@ -24,6 +24,11 @@
     content_for 'block', type: '_header-logo', id: 'header-logo'
   endcapture
 
+  if section.settings.header_background_style == 'solid' and section.settings.enable_logo_cutout
+    assign badge_logo = logo
+    assign logo = ''
+  endif
+
   capture menu
     content_for 'block', type: '_header-menu', id: 'header-menu'
   endcapture
@@ -128,16 +133,20 @@
     assign class = class | append: ' ' | append: collapse_header_paddings_class
   endif
 
-  # PALIROOTS 2: Configure header styles based on page type
-  # Home page gets adaptive (scroll-based) version
-  # All other pages get gradient (non-adaptive) version
-  
-  if template.name == 'index'
-    # Home page: Use adaptive scroll-based header
+  if section.settings.header_background_style == 'solid'
+    assign class = class | append: ' header--solid-bg'
+    assign sticky = 'always'
+    if section.settings.enable_logo_cutout
+      assign class = class | append: ' header--logo-cutout'
+    endif
+  elsif template.name == 'index'
     assign class = class | append: ' header--adaptive header--scroll-adaptive'
   else
-    # All other pages: Use gradient header (non-adaptive)
     assign class = class | append: ' header--gradient-static'
+  endif
+
+  if section.settings.show_bottom_border
+    assign class = class | append: ' header--bottom-border'
   endif
 %}
 
@@ -192,6 +201,10 @@
       if row == 'top'
         assign style = style | append: '--border-bottom-width-mobile: [width]px; ' | replace: '[width]', section.settings.border_width
       endif
+
+      if row == 'top' and section.settings.header_background_style == 'solid' and section.settings.enable_logo_cutout
+        assign style = style | append: '--cutout-depth: ' | append: section.settings.logo_cutout_depth | append: 'px; --cutout-width: ' | append: section.settings.logo_cutout_width | append: 'px; --cutout-slant: ' | append: section.settings.logo_cutout_slant | append: 'px;'
+      endif
     %}
 
     {% capture content %}
@@ -221,6 +234,11 @@
         <div class="header__columns spacing-style">
           {{ content }}
         </div>
+        {% if row == 'top' and section.settings.header_background_style == 'solid' and section.settings.enable_logo_cutout %}
+          <div class="header__logo-cutout-badge">
+            {{ badge_logo }}
+          </div>
+        {% endif %}
       </div>
     {% endif %}
   {% endfor %}
@@ -712,6 +730,119 @@
       margin-top: calc(var(--header-height) * -1);
     }
   }
+  /* Solid background header */
+  .header--solid-bg {
+    position: relative;
+    --header-logo-display: block;
+    --header-logo-inverse-display: none;
+  }
+
+  .header--solid-bg .header__row {
+    background-color: #ffffff;
+    --color-foreground: #000000;
+    --color-foreground-heading: #000000;
+    color: #000000;
+  }
+
+  .header--solid-bg .header__row * {
+    color: #000000 !important;
+  }
+
+  .header--solid-bg .header-logo svg {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  /* Logo cutout — integrated slanted cuts in the navbar itself */
+
+  /* Allow the badge to render below the row's own bounds */
+  .header--logo-cutout,
+  .header--logo-cutout .header__row--top {
+    overflow: visible !important;
+  }
+
+  /* Navbar row with integrated logo cutout using clip-path */
+  .header--logo-cutout .header__row--top {
+    position: relative !important;
+  }
+
+  /* Create the slanted cutout directly in the navbar */
+  .header--logo-cutout .header__row--top .header__columns {
+    position: relative;
+    background-color: var(--color-background);
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% 100%,
+      calc(50% + var(--cutout-width, 160px)/2 + var(--cutout-slant, 20px)) 100%,
+      calc(50% + var(--cutout-width, 160px)/2) calc(100% - var(--cutout-slant, 20px)),
+      calc(50% - var(--cutout-width, 160px)/2) calc(100% - var(--cutout-slant, 20px)),
+      calc(50% - var(--cutout-width, 160px)/2 - var(--cutout-slant, 20px)) 100%,
+      0% 100%
+    );
+  }
+
+  /* Add border to the clipped navbar - only show when border option is enabled */
+  .header--logo-cutout.header--bottom-border .header__row--top .header__columns::after,
+  .header--logo-cutout .header__row--top .header__columns::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: transparent;
+    border: var(--border-bottom-width, 0) solid var(--color-border);
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% 100%,
+      calc(50% + var(--cutout-width, 160px)/2 + var(--cutout-slant, 20px)) 100%,
+      calc(50% + var(--cutout-width, 160px)/2) calc(100% - var(--cutout-slant, 20px)),
+      calc(50% - var(--cutout-width, 160px)/2) calc(100% - var(--cutout-slant, 20px)),
+      calc(50% - var(--cutout-width, 160px)/2 - var(--cutout-slant, 20px)) 100%,
+      0% 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Hide border when not enabled */
+  .header--logo-cutout:not(.header--bottom-border) .header__row--top .header__columns::after {
+    display: none;
+  }
+
+  /*
+   * The badge sits in the cutout area of the navbar
+   * It is positioned absolutely and extends below the navbar
+   */
+  .header__logo-cutout-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--cutout-width, 160px);
+    height: calc(100% + var(--cutout-depth, 20px));
+    padding-block: var(--header-padding);
+    padding-inline: var(--padding-sm, 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Render above page content (hero, etc.) */
+    z-index: var(--layer-overlay);
+    background: var(--color-background);
+    border: var(--border-bottom-width, 0) solid var(--color-border);
+    border-top: none;
+  }
+
+  /* Logo sits above the background */
+  .header__logo-cutout-badge > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Bottom border option (flat solid-bg without cutout) */
+  .header--bottom-border:not(.header--logo-cutout) .header__row--top:not(.divider--page-width),
+  .header--bottom-border:not(.header--logo-cutout) .header__row--top.divider--page-width .header__columns {
+    --border-bottom-width: 1px;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -898,6 +1029,73 @@
     {
       "type": "header",
       "content": "t:content.appearance"
+    },
+    {
+      "type": "select",
+      "id": "header_background_style",
+      "label": "Background style",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Use color scheme"
+        },
+        {
+          "value": "solid",
+          "label": "Solid white"
+        }
+      ],
+      "default": "theme",
+      "info": "Solid white uses the default logo and black text and is always sticky."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_logo_cutout",
+      "label": "Logo cutout",
+      "default": false,
+      "info": "Reshapes the navbar with a stepped bump at the center for the logo. Border follows the cut shape.",
+      "visible_if": "{{ section.settings.header_background_style == 'solid' }}"
+    },
+    {
+      "type": "range",
+      "id": "logo_cutout_depth",
+      "label": "Cutout depth",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 20,
+      "info": "How far the logo bump extends below the main bar.",
+      "visible_if": "{{ section.settings.enable_logo_cutout and section.settings.header_background_style == 'solid' }}"
+    },
+    {
+      "type": "range",
+      "id": "logo_cutout_width",
+      "label": "Cutout width",
+      "min": 80,
+      "max": 280,
+      "step": 10,
+      "unit": "px",
+      "default": 160,
+      "info": "Total width of the logo bump.",
+      "visible_if": "{{ section.settings.enable_logo_cutout and section.settings.header_background_style == 'solid' }}"
+    },
+    {
+      "type": "range",
+      "id": "logo_cutout_slant",
+      "label": "Cutout slant",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 20,
+      "info": "Controls the angle of the slanted cuts leading into the logo cutout.",
+      "visible_if": "{{ section.settings.enable_logo_cutout and section.settings.header_background_style == 'solid' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_border",
+      "label": "Show bottom border",
+      "default": false
     },
     {
       "type": "select",

@@ -69,12 +69,29 @@ body {
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('./neuemontreal-medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('./PPNeueMachina-PlainUltrabold.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================
    2. CUSTOM FONT PROPERTIES
    ============================================ */
 
 :root {
   /* Primary Font Definitions */
+  --font-h1: 'PP Neue Machina', sans-serif;
   --font-header: 'Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-body: 'Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-button: 'Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -90,7 +107,7 @@ body {
 
 :root {
   /* Override Heading Font Families */
-  --font-h1--family: var(--font-header);
+  --font-h1--family: var(--font-h1);
   --font-h2--family: var(--font-header);
   --font-h3--family: var(--font-header);
   --font-h4--family: var(--font-header);
@@ -121,10 +138,18 @@ body {
    ============================================ */
 
 /* Headings */
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6, jumbo-text, .ready {
+h2, h3, h4, h5, h6,
+.h2, .h3, .h4, .h5, .h6 {
   font-family: var(--font-header) !important;
   font-weight: var(--font-weight-medium) !important;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1, jumbo-text, .ready {
+  font-family: var(--font-h1) !important;
+  font-weight: 800 !important;
   font-feature-settings: 'liga' 1, 'kern' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
