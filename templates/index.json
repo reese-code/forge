@@ -105,13 +105,32 @@
         "section_height_custom": 50,
         "color_scheme": "scheme-6",
         "toggle_overlay": true,
-        "overlay_color": "#00000014",
+        "overlay_color": "#0000008e",
         "overlay_style": "gradient",
-        "gradient_direction": "to bottom",
+        "gradient_direction": "to top",
         "blurred_reflection": true,
         "reflection_opacity": 75,
         "padding-block-start": 100,
         "padding-block-end": 48
+      }
+    },
+    "logo_with_text_tEWjDK": {
+      "type": "logo-with-text",
+      "name": "t:names.logo_with_text",
+      "settings": {
+        "logo": "shopify://shop_images/forge_small_logo.svg",
+        "logo_height": 65,
+        "content_width": "two-thirds",
+        "content_position": "right",
+        "text_layout": "wrap",
+        "content_gap": 10,
+        "heading": "",
+        "heading_tag": "h2",
+        "heading_size": "h2",
+        "text": "<h2>orge is a men's grooming brand built on one principle: make it right or don't make it at all. No shortcuts, no filler — just products crafted with the kind of integrity the name demands.</h2>",
+        "section_width": "full-width",
+        "padding-block-start": 80,
+        "padding-block-end": 80
       }
     },
     "product_list_AHGCT4": {
@@ -375,6 +394,7 @@
   },
   "order": [
     "hero_jVaWmY",
+    "logo_with_text_tEWjDK",
     "product_list_AHGCT4"
   ]
 }
