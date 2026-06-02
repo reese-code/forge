@@ -16,7 +16,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<h3>I LOVE PALI</h3>",
+            "text": "<h1>BUILT FOR THE MODERN MAN</h1>",
             "width": "fit-content",
             "max_width": "normal",
             "alignment": "left",
@@ -90,6 +90,7 @@
         "link": "",
         "open_in_new_tab": false,
         "media_type_1": "image",
+        "image_1": "shopify://shop_images/forge_hero_img.png",
         "media_type_2": "image",
         "content_direction": "column",
         "vertical_on_mobile": true,
