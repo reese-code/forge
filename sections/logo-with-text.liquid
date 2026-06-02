@@ -1,23 +1,32 @@
 {% stylesheet %}
   .logo-with-text {
-    --lwt-gap: 2rem;
+    --lwt-gap: var(--content-gap);
   }
 
-  /* Logo size options on desktop */
-  .logo-with-text__logo-wrap--three-fourths {
-    width: 75%;
+  /* Content container width options using viewport width */
+  .logo-with-text__container--three-fourths {
+    max-width: 75vw;
   }
 
-  .logo-with-text__logo-wrap--half {
-    width: 50%;
+  .logo-with-text__container--half {
+    max-width: 50vw;
   }
 
-  .logo-with-text__logo-wrap--one-third {
-    width: 33.333%;
+  .logo-with-text__container--one-third {
+    max-width: 33vw;
   }
 
-  .logo-with-text__logo-wrap--full {
-    width: 100%;
+  .logo-with-text__container--full {
+    max-width: 100vw;
+  }
+
+  /* Logo height control */
+  .logo-with-text__logo-wrap img,
+  .logo-with-text__logo-wrap svg {
+    display: block;
+    width: auto;
+    height: var(--logo-height);
+    max-width: 100%;
   }
 
   /* Side layout: logo sits beside paragraph */
@@ -49,20 +58,7 @@
     clear: both;
   }
 
-  /* Logo / icon image */
-  .logo-with-text__logo-wrap img,
-  .logo-with-text__logo-wrap svg {
-    display: block;
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Text */
-  .logo-with-text__body {
-    line-height: 1.6;
-  }
-
-  /* Mobile — always full width, always stacked */
+  /* Mobile — always stacked */
   @media screen and (max-width: 749px) {
     .logo-with-text--side,
     .logo-with-text--wrap {
@@ -72,15 +68,20 @@
     .logo-with-text--side .logo-with-text__logo-wrap,
     .logo-with-text--wrap .logo-with-text__logo-wrap {
       float: none;
-      width: 100% !important;
       margin-right: 0;
       margin-bottom: var(--lwt-gap);
+    }
+
+    .logo-with-text__container--three-fourths,
+    .logo-with-text__container--half,
+    .logo-with-text__container--one-third {
+      max-width: 100%;
     }
   }
 {% endstylesheet %}
 
 {%- liquid
-  assign logo_width_class = 'logo-with-text__logo-wrap--' | append: section.settings.logo_width
+  assign container_width_class = 'logo-with-text__container--' | append: section.settings.content_width
   assign layout_class     = 'logo-with-text--' | append: section.settings.text_layout
 -%}
 
@@ -91,10 +92,10 @@
     {%- render 'border-override', settings: section.settings -%}
   "
 >
-  <div class="logo-with-text {{ layout_class }}">
+  <div class="logo-with-text {{ layout_class }} {{ container_width_class }}" style="--logo-height: {{ section.settings.logo_height }}px; --content-gap: {{ section.settings.content_gap }}px;">
 
     {%- if section.settings.logo != blank or section.settings.icon != blank -%}
-      <div class="logo-with-text__logo-wrap {{ logo_width_class }}">
+      <div class="logo-with-text__logo-wrap">
         {%- if section.settings.logo != blank -%}
           {%- assign logo_alt = section.settings.logo.alt | default: section.settings.heading | default: 'Logo' -%}
           {{ section.settings.logo | image_url: width: 800 | image_tag: loading: 'lazy', widths: '200, 400, 600, 800', alt: logo_alt }}
@@ -146,21 +147,32 @@
       "info": "Use a small icon instead of a full logo."
     },
     {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Logo / icon height",
+      "info": "Height in pixels. Width will be automatic to maintain aspect ratio.",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
       "type": "select",
-      "id": "logo_width",
-      "label": "Logo / icon width (desktop)",
-      "info": "On mobile this is always full width.",
+      "id": "content_width",
+      "label": "Content width",
+      "info": "Controls the width of the entire content block.",
       "options": [
         { "value": "three-fourths", "label": "Three-fourths (75%)" },
         { "value": "half",          "label": "Half (50%)" },
         { "value": "one-third",     "label": "One-third (33%)" },
         { "value": "full",          "label": "Full width (100%)" }
       ],
-      "default": "half"
-    },
-    {
-      "type": "header",
-      "content": "Text layout"
+      "default": "full"
     },
     {
       "type": "select",
@@ -172,6 +184,17 @@
       ],
       "default": "side",
       "info": "On mobile the paragraph always appears below the logo."
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Gap between logo and content",
+      "info": "Controls the spacing between the logo and text content.",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 32
     },
     {
       "type": "header",
@@ -257,7 +280,9 @@
       "name": "t:names.logo_with_text",
       "category": "t:categories.storytelling",
       "settings": {
-        "logo_width": "half",
+        "logo_height": 60,
+        "content_width": "full",
+        "content_gap": 32,
         "text_layout": "side",
         "heading": "Built on one principle.",
         "text": "<p>Make it right or don't make it at all. No shortcuts, no filler — just products crafted with the kind of integrity the name demands.</p>",
