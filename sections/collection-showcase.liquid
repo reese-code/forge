@@ -1,0 +1,708 @@
+
+
+{% stylesheet %}
+  .collection-showcase {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Slides Container ── */
+  .collection-showcase__slides-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--collection-slide-border-radius, 0px);
+    clip-path: polygon(
+      var(--collection-cutout-size, 0px) 0%,
+      calc(100% - var(--collection-cutout-size, 0px)) 0%,
+      100% var(--collection-cutout-size, 0px),
+      100% calc(100% - var(--collection-cutout-size, 0px)),
+      calc(100% - var(--collection-cutout-size, 0px)) 100%,
+      var(--collection-cutout-size, 0px) 100%,
+      0% calc(100% - var(--collection-cutout-size, 0px)),
+      0% var(--collection-cutout-size, 0px)
+    );
+  }
+
+  /* ── Individual Slide ── */
+  .collection-showcase__slide {
+    display: none;
+    position: absolute;
+    /* inset: 0 is relative to .collection-showcase__slides-container (the nearest positioned ancestor) */
+    inset: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .collection-showcase__slide.is-active {
+    display: flex;
+  }
+
+  /* ── Slide Image ── */
+  .collection-showcase__image-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .collection-showcase__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .collection-showcase__image-wrapper placeholder-image,
+  .collection-showcase__image-wrapper placeholder-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── Slide Inner Content ── */
+  .collection-showcase__slide-inner {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    pointer-events: none;
+  }
+
+  @media screen and (width < 750px) {
+    .collection-showcase__slide-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 1.5rem 1.5rem 1rem;
+      gap: 1rem;
+    }
+  }
+
+  .collection-showcase__slide-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 55%;
+  }
+
+  @media screen and (width < 750px) {
+    .collection-showcase__slide-text {
+      max-width: 100%;
+    }
+  }
+
+  .collection-showcase__slide-title {
+    margin: 0;
+    color: #fff;
+  }
+
+  .collection-showcase__slide-description {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  /* Full-slide clickable link */
+  .collection-showcase__slide-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .collection-showcase__slide-button {
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+    align-self: flex-end;
+    pointer-events: auto;
+  }
+
+  @media screen and (width < 750px) {
+    .collection-showcase__slide-button {
+      align-self: flex-start;
+    }
+  }
+
+  /* ── Navigation Wrapper (inside slides container) ── */
+  .collection-showcase__nav-wrapper {
+    position: relative;
+    z-index: 4;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  /* ── Desktop Tabs ── */
+  .collection-showcase__tabs {
+    display: none;
+    width: 100%;
+  }
+
+  @media screen and (width >= 750px) {
+    .collection-showcase__tabs {
+      display: flex;
+      width: 100%;
+    }
+  }
+
+  .collection-showcase__tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: color 0.3s ease;
+  }
+
+  .collection-showcase__tab-bar {
+    width: 100%;
+    height: var(--tab-bar-height, 2px);
+    background: currentColor;
+    opacity: var(--tab-inactive-opacity, 0.3);
+    transition: opacity 0.4s ease;
+  }
+
+  .collection-showcase__tab.is-active .collection-showcase__tab-bar {
+    opacity: var(--tab-active-opacity, 1);
+  }
+
+  .collection-showcase__tab-label {
+    display: block;
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+    opacity: var(--tab-text-inactive-opacity, 0.6);
+    transition: opacity 0.4s ease;
+    text-align: center;
+    width: 100%;
+  }
+
+  .collection-showcase__tab.is-active .collection-showcase__tab-label {
+    opacity: 1;
+  }
+
+  /* ── Mobile Dropdown ── */
+  .collection-showcase__mobile-nav {
+    display: block;
+    width: 100%;
+  }
+
+  @media screen and (width >= 750px) {
+    .collection-showcase__mobile-nav {
+      display: none;
+    }
+  }
+
+  .collection-showcase__dropdown {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: auto;
+  }
+
+  /* ── Slides wrapper — provides height so the container sizes correctly.
+     No position:relative here so that slides (position:absolute; inset:0)
+     remain positioned relative to .collection-showcase__slides-container
+     and cover the entire container including the tab nav area. ── */
+  .collection-showcase__slides-wrapper {
+    min-height: var(--collection-slide-height);
+    flex: 1;
+  }
+{% endstylesheet %}
+
+{% liquid
+  assign has_blocks = false
+  if section.blocks.size > 0
+    assign has_blocks = true
+  endif
+%}
+
+<collection-showcase
+  id="CollectionShowcase-{{ section.id }}"
+  class="
+    section
+    section--{{ section.settings.section_width }}
+    color-{{ section.settings.color_scheme }}
+    collection-showcase
+    spacing-style
+  "
+  data-autoplay="{{ section.settings.autoplay_speed }}"
+  style="
+    {% render 'spacing-style', settings: section.settings %}
+    --tab-inactive-opacity: {{ section.settings.tab_inactive_opacity | divided_by: 100.0 }};
+    --tab-active-opacity: {{ section.settings.tab_active_opacity | divided_by: 100.0 }};
+    --tab-text-inactive-opacity: {{ section.settings.tab_inactive_opacity | divided_by: 100.0 | plus: 0.2 | at_most: 1.0 }};
+    --tab-bar-height: {{ section.settings.tab_bar_height }}px;
+    --collection-slide-border-radius: {{ section.settings.slide_border_radius }}px;
+    --collection-cutout-size: {{ section.settings.cutout_size }}px;
+    {% case section.settings.slide_height %}
+      {% when 'small' %}
+        --collection-slide-height: var(--section-height-small);
+      {% when 'medium' %}
+        --collection-slide-height: var(--section-height-medium);
+      {% when 'large' %}
+        --collection-slide-height: var(--section-height-large);
+      {% when 'custom' %}
+        --collection-slide-height: {{ section.settings.slide_height_custom }}svh;
+    {% endcase %}
+  "
+>
+  {%- comment -%} ── Slides + Nav inside the clipped image container ── {%- endcomment -%}
+  <div class="collection-showcase__slides-container">
+
+    {%- comment -%} Height anchor so slides (position:absolute) have a reference ── {%- endcomment -%}
+    <div class="collection-showcase__slides-wrapper">
+
+      {% if has_blocks %}
+        {% for block in section.blocks %}
+          {%- liquid
+            assign collection = block.settings.collection
+            assign slide_title = block.settings.slide_title
+            if slide_title == blank and collection != blank
+              assign slide_title = collection.title
+            endif
+          -%}
+          <div
+            class="collection-showcase__slide{% if forloop.first %} is-active{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- comment -%} Background image {%- endcomment -%}
+            <div class="collection-showcase__image-wrapper">
+              {%- if collection != blank and collection.featured_image != blank -%}
+                {%- liquid
+                  if forloop.first
+                    assign img_loading = 'eager'
+                  else
+                    assign img_loading = 'lazy'
+                  endif
+                -%}
+                {{
+                  collection.featured_image
+                  | image_url: width: 2000
+                  | image_tag:
+                    loading: img_loading,
+                    class: 'collection-showcase__image',
+                    sizes: '(min-width: 750px) 100vw, 100vw',
+                    widths: '400, 600, 800, 1000, 1200, 1600, 2000',
+                    alt: collection.featured_image.alt | default: collection.title
+                }}
+              {%- else -%}
+                <placeholder-image
+                  class="collection-showcase__image"
+                  data-block-id="{{ block.id }}"
+                  data-type="collection"
+                ></placeholder-image>
+              {%- endif -%}
+
+              {%- comment -%} Gradient overlay {%- endcomment -%}
+              {%- if block.settings.toggle_overlay -%}
+                {%- render 'overlay', settings: block.settings -%}
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Slide content overlay (title, description, button) {%- endcomment -%}
+            <div class="collection-showcase__slide-inner">
+              <div class="collection-showcase__slide-text">
+                {%- if slide_title != blank -%}
+                  <h2 class="collection-showcase__slide-title">{{ slide_title }}</h2>
+                {%- endif -%}
+                {%- if block.settings.slide_description != blank -%}
+                  <p class="collection-showcase__slide-description">{{ block.settings.slide_description }}</p>
+                {%- endif -%}
+              </div>
+
+              {%- if block.settings.button_label != blank -%}
+                <a
+                  href="{{ block.settings.button_link | default: collection.url | default: '#' }}"
+                  class="button collection-showcase__slide-button"
+                >
+                  {{- block.settings.button_label -}}
+                </a>
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Full-slide link to collection (image area only — sits below nav z-index) {%- endcomment -%}
+            {%- if collection != blank -%}
+              <a
+                href="{{ collection.url }}"
+                class="collection-showcase__slide-link"
+                aria-label="{{ collection.title }}"
+                tabindex="-1"
+              ></a>
+            {%- endif -%}
+          </div>
+        {% endfor %}
+
+      {% else %}
+        {%- comment -%} Onboarding / placeholder state {%- endcomment -%}
+        <div class="collection-showcase__slide is-active">
+          <div class="collection-showcase__image-wrapper">
+            <placeholder-image
+              class="collection-showcase__image"
+              data-type="collection"
+            ></placeholder-image>
+          </div>
+          <div class="collection-showcase__slide-inner">
+            <div class="collection-showcase__slide-text">
+              <h2 class="collection-showcase__slide-title">Collection title</h2>
+              <p class="collection-showcase__slide-description">Add a description for this collection</p>
+            </div>
+            <a href="#" class="button collection-showcase__slide-button">Shop collection</a>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>{%- comment -%} /.collection-showcase__slides-wrapper {%- endcomment -%}
+
+    {%- comment -%} ── Navigation (inside image container, below the slides) ── {%- endcomment -%}
+    {% if has_blocks %}
+      <div class="collection-showcase__nav-wrapper">
+
+        {%- comment -%} Mobile dropdown {%- endcomment -%}
+        <div class="collection-showcase__mobile-nav">
+          <label class="visually-hidden" for="CollectionShowcaseDropdown-{{ section.id }}">
+            Select collection
+          </label>
+          <select
+            id="CollectionShowcaseDropdown-{{ section.id }}"
+            class="collection-showcase__dropdown"
+            aria-label="Select collection"
+          >
+            {% for block in section.blocks %}
+              {% assign collection = block.settings.collection %}
+              <option value="{{ forloop.index0 }}">
+                {{- collection.title | default: 'Collection' -}}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {%- comment -%} Desktop tab bar — buttons only, no page navigation {%- endcomment -%}
+        <div class="collection-showcase__tabs" role="tablist">
+          {% for block in section.blocks %}
+            {% assign collection = block.settings.collection %}
+            <button
+              type="button"
+              class="collection-showcase__tab{% if forloop.first %} is-active{% endif %}"
+              data-index="{{ forloop.index0 }}"
+              role="tab"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-label="{{ collection.title | default: 'Collection' }}"
+            >
+              <div class="collection-showcase__tab-bar" aria-hidden="true"></div>
+              <span class="collection-showcase__tab-label">
+                {{- collection.title | default: 'Collection' -}}
+              </span>
+            </button>
+          {% endfor %}
+        </div>
+
+      </div>
+    {% endif %}
+
+  </div>{%- comment -%} /.collection-showcase__slides-container {%- endcomment -%}
+
+</collection-showcase>
+
+<script src="{{ 'collection-showcase.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Collection Showcase",
+  "tag": "section",
+  "class": "section-wrapper",
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "slide_title",
+          "label": "Title",
+          "info": "Defaults to collection title if blank"
+        },
+        {
+          "type": "textarea",
+          "id": "slide_description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop collection"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "info": "Defaults to collection URL if blank"
+        },
+        {
+          "type": "header",
+          "content": "Overlay"
+        },
+        {
+          "type": "checkbox",
+          "id": "toggle_overlay",
+          "label": "Enable overlay",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay color",
+          "alpha": true,
+          "default": "#00000066",
+          "visible_if": "{{ block.settings.toggle_overlay }}"
+        },
+        {
+          "type": "select",
+          "id": "overlay_style",
+          "label": "Overlay style",
+          "options": [
+            { "value": "solid", "label": "Solid" },
+            { "value": "gradient", "label": "Gradient" }
+          ],
+          "default": "gradient",
+          "visible_if": "{{ block.settings.toggle_overlay }}"
+        },
+        {
+          "type": "select",
+          "id": "gradient_direction",
+          "label": "Gradient direction",
+          "options": [
+            { "value": "to top", "label": "Up (bottom to top)" },
+            { "value": "to bottom", "label": "Down (top to bottom)" }
+          ],
+          "default": "to top",
+          "visible_if": "{{ block.settings.toggle_overlay and block.settings.overlay_style == 'gradient' }}"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Slides"
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "label": "Slide height",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "custom", "label": "Custom" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "range",
+      "id": "slide_height_custom",
+      "label": "Custom height",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 60,
+      "visible_if": "{{ section.settings.slide_height == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "slide_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "cutout_size",
+      "label": "Corner cutout size",
+      "info": "Creates diagonal cut corners on the slide image",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Auto-rotate"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Auto-rotate speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Tab navigation"
+    },
+    {
+      "type": "range",
+      "id": "tab_bar_height",
+      "label": "Bar thickness",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "tab_inactive_opacity",
+      "label": "Inactive bar opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "tab_active_opacity",
+      "label": "Active bar opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Showcase",
+      "category": "Collections",
+      "settings": {
+        "slide_height": "medium",
+        "slide_border_radius": 4,
+        "cutout_size": 16,
+        "autoplay_speed": 5,
+        "tab_bar_height": 2,
+        "tab_inactive_opacity": 25,
+        "tab_active_opacity": 100,
+        "section_width": "full-width",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "collection_1": {
+          "type": "collection",
+          "settings": {
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "toggle_overlay": true,
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_2": {
+          "type": "collection",
+          "settings": {
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "toggle_overlay": true,
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_3": {
+          "type": "collection",
+          "settings": {
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "toggle_overlay": true,
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        }
+      },
+      "block_order": ["collection_1", "collection_2", "collection_3"]
+    }
+  ]
+}
+{% endschema %}
