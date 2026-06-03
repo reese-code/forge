@@ -22,7 +22,7 @@
 
   /* ── Individual Slide ── */
   .collection-showcase__slide {
-    display: none;
+    display: flex;
     position: absolute;
     /* inset: 0 is relative to .collection-showcase__slides-container (the nearest positioned ancestor) */
     inset: 0;
@@ -30,10 +30,14 @@
     justify-content: flex-end;
     /* Push content above the nav bar — controlled by --content-bottom-offset */
     padding-bottom: var(--content-bottom-offset, 64px);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    z-index: 0;
   }
 
   .collection-showcase__slide.is-active {
-    display: flex;
+    opacity: 1;
+    z-index: 1;
   }
 
   /* ── Slide Image ── */
@@ -90,6 +94,19 @@
       max-width: 100%;
       flex: 1;
       min-width: 0;
+    }
+  }
+
+  /* ── Mobile layout: stacked override ── */
+  @media screen and (width < 750px) {
+    .collection-showcase[data-mobile-layout="stacked"] .collection-showcase__slide-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .collection-showcase[data-mobile-layout="stacked"] .collection-showcase__slide-text {
+      flex: 0 0 auto;
+      width: 100%;
     }
   }
 
@@ -193,15 +210,33 @@
     }
   }
 
+  .collection-showcase__dropdown-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .collection-showcase__dropdown-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 1.125rem;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid rgba(255, 255, 255, 0.8);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+    transform: translateY(-65%) rotate(45deg);
+    pointer-events: none;
+  }
+
   .collection-showcase__dropdown {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     background: transparent;
     color: #fff;
     font-size: 1rem;
     cursor: pointer;
-    appearance: auto;
+    appearance: none;
     text-align: center;
   }
 
@@ -232,6 +267,7 @@
     spacing-style
   "
   data-autoplay="{{ section.settings.autoplay_speed }}"
+  data-mobile-layout="{{ section.settings.mobile_content_layout }}"
   style="
     {% render 'spacing-style', settings: section.settings %}
     --tab-inactive-opacity: {{ section.settings.tab_inactive_opacity | divided_by: 100.0 }};
@@ -374,18 +410,20 @@
           <label class="visually-hidden" for="CollectionShowcaseDropdown-{{ section.id }}">
             Select collection
           </label>
-          <select
-            id="CollectionShowcaseDropdown-{{ section.id }}"
-            class="collection-showcase__dropdown"
-            aria-label="Select collection"
-          >
-            {% for block in section.blocks %}
-              {% assign collection = block.settings.collection %}
-              <option value="{{ forloop.index0 }}">
-                {{- collection.title | default: 'Collection' -}}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="collection-showcase__dropdown-wrapper">
+            <select
+              id="CollectionShowcaseDropdown-{{ section.id }}"
+              class="collection-showcase__dropdown"
+              aria-label="Select collection"
+            >
+              {% for block in section.blocks %}
+                {% assign collection = block.settings.collection %}
+                <option value="{{ forloop.index0 }}">
+                  {{- collection.title | default: 'Collection' -}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
 
         {%- comment -%} Desktop tab bar — buttons only, no page navigation {%- endcomment -%}
@@ -578,6 +616,20 @@
     },
     {
       "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_layout",
+      "label": "Content layout",
+      "options": [
+        { "value": "inline", "label": "Inline — text left, button right" },
+        { "value": "stacked", "label": "Stacked — text and button in a column" }
+      ],
+      "default": "inline"
+    },
+    {
+      "type": "header",
       "content": "Auto-rotate"
     },
     {
@@ -718,6 +770,7 @@
         "nav_side_padding": 0,
         "nav_bottom_padding": 0,
         "section_width": "page-width",
+        "mobile_content_layout": "inline",
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 0
