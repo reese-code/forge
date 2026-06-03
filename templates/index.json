@@ -105,7 +105,7 @@
         "section_height_custom": 50,
         "color_scheme": "scheme-6",
         "toggle_overlay": true,
-        "overlay_color": "#0000008e",
+        "overlay_color": "#0000008f",
         "overlay_style": "gradient",
         "gradient_direction": "to top",
         "blurred_reflection": true,
@@ -120,6 +120,7 @@
       "settings": {
         "logo": "shopify://shop_images/forge_small_logo.svg",
         "logo_height": 65,
+        "logo_height_mobile": 40,
         "content_width": "two-thirds",
         "content_position": "right",
         "text_layout": "wrap",
@@ -390,11 +391,115 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "collection_showcase_MWkDfz": {
+      "type": "collection-showcase",
+      "blocks": {
+        "collection_kGLMVQ": {
+          "type": "collection",
+          "settings": {
+            "collection": "shave",
+            "slide_title": "",
+            "slide_description": "Dasdfsadfasdsadfasdfasdfasdd",
+            "button_label": "Shop collection",
+            "button_link": "",
+            "toggle_overlay": true,
+            "overlay_color": "#00000054",
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_zLFCY8": {
+          "type": "collection",
+          "settings": {
+            "collection": "grooming",
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "button_link": "",
+            "toggle_overlay": true,
+            "overlay_color": "#00000066",
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_PqGgPT": {
+          "type": "collection",
+          "settings": {
+            "collection": "hair",
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "button_link": "",
+            "toggle_overlay": true,
+            "overlay_color": "#00000066",
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_Vw8M8i": {
+          "type": "collection",
+          "settings": {
+            "collection": "fragrances",
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "button_link": "",
+            "toggle_overlay": true,
+            "overlay_color": "#00000066",
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        },
+        "collection_migaUV": {
+          "type": "collection",
+          "settings": {
+            "collection": "skin-care",
+            "slide_title": "",
+            "slide_description": "",
+            "button_label": "Shop collection",
+            "button_link": "",
+            "toggle_overlay": true,
+            "overlay_color": "#00000066",
+            "overlay_style": "gradient",
+            "gradient_direction": "to top"
+          }
+        }
+      },
+      "block_order": [
+        "collection_kGLMVQ",
+        "collection_zLFCY8",
+        "collection_PqGgPT",
+        "collection_Vw8M8i",
+        "collection_migaUV"
+      ],
+      "name": "Collection Showcase",
+      "settings": {
+        "slide_height": "small",
+        "slide_height_custom": 60,
+        "slide_border_radius": 0,
+        "cutout_size": 40,
+        "content_bottom_offset": 40,
+        "content_gap": 16,
+        "mobile_content_layout": "stacked",
+        "autoplay_speed": 5,
+        "tab_bar_height": 2,
+        "tab_inactive_opacity": 25,
+        "tab_active_opacity": 100,
+        "tab_font_size": 16,
+        "nav_side_padding": 40,
+        "nav_bottom_padding": 0,
+        "section_width": "page-width",
+        "color_scheme": "scheme-5",
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
     "logo_with_text_tEWjDK",
-    "product_list_AHGCT4"
+    "product_list_AHGCT4",
+    "collection_showcase_MWkDfz"
   ]
 }
