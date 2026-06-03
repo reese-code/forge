@@ -1,11 +1,6 @@
 
 
 {% stylesheet %}
-  .collection-showcase {
-    display: flex;
-    flex-direction: column;
-  }
-
   /* ── Slides Container ── */
   .collection-showcase__slides-container {
     position: relative;
@@ -78,6 +73,8 @@
   @media screen and (width < 750px) {
     .collection-showcase__slide-inner {
       padding: 1.5rem;
+      flex-direction: row;
+      align-items: flex-end;
     }
   }
 
@@ -91,6 +88,8 @@
   @media screen and (width < 750px) {
     .collection-showcase__slide-text {
       max-width: 100%;
+      flex: 1;
+      min-width: 0;
     }
   }
 
@@ -203,6 +202,7 @@
     font-size: 1rem;
     cursor: pointer;
     appearance: auto;
+    text-align: center;
   }
 
   /* ── Slides wrapper — provides height so the container sizes correctly.
@@ -667,7 +667,7 @@
         { "value": "page-width", "label": "Page" },
         { "value": "full-width", "label": "Full" }
       ],
-      "default": "full-width"
+      "default": "page-width"
     },
     {
       "type": "color_scheme",
@@ -717,7 +717,7 @@
         "tab_font_size": 14,
         "nav_side_padding": 0,
         "nav_bottom_padding": 0,
-        "section_width": "full-width",
+        "section_width": "page-width",
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 0
