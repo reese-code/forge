@@ -41,9 +41,9 @@
 /* =============================================
  * 2. BASE/RESET STYLES
  * ============================================= */
-html, 
+html,
 body {
-  background-color: var(--color-bg) !important;
+  background-color: var(--color-bg);
 }
 
 
