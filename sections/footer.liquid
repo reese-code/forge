@@ -1,10 +1,16 @@
 
 
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
   class="
     section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}
     {% if section.settings.section_height != "" %} {{ section.settings.section_height | prepend: "section--height-" }}{% endif %}
+  "
+  style="
+    background-color: var(--color-background);
+    border-top-left-radius: {{ section.settings.border_radius_top_left }}px;
+    border-top-right-radius: {{ section.settings.border_radius_top_right }}px;
+    overflow: hidden;
+    {% if section.settings.section_width == 'full-width' %}padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;{% endif %}
   "
 >
   {% render 'background-media',
@@ -278,6 +284,37 @@
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "border_radius_top_left",
+      "label": "Top left corner radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "border_radius_top_right",
+      "label": "Top right corner radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_inline",
+      "label": "Side padding (full width)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 40,
+      "visible_if": "{{ section.settings.section_width == 'full-width' }}"
     },
     {
       "type": "select",
