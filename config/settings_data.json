@@ -236,7 +236,7 @@
       },
       "scheme-5": {
         "settings": {
-          "background": "#333333",
+          "background": "#000000",
           "foreground_heading": "#ffffff",
           "foreground": "#ffffff",
           "primary": "#ffffff",
@@ -255,7 +255,7 @@
           "secondary_button_hover_background": "#ffffff",
           "secondary_button_hover_text": "#000000",
           "secondary_button_hover_border": "#ffffff",
-          "input_background": "#333333",
+          "input_background": "#000000",
           "input_text_color": "#ffffffed",
           "input_border_color": "#ffffffb0",
           "input_hover_background": "#ffffff0a",
