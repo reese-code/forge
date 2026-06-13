@@ -1,0 +1,42 @@
+{% comment %}
+  Quiz product card — rendered server-side from JS fetch results.
+  Params: product (object), show_atc (boolean from section settings)
+{% endcomment %}
+
+<div class="quiz-product-card">
+  <a href="{{ product.url }}" class="quiz-product-card__image-link">
+    {%- if product.featured_media -%}
+      <img
+        src="{{ product.featured_media | image_url: width: 600 }}"
+        alt="{{ product.featured_media.alt | escape }}"
+        width="600"
+        height="{{ 600 | divided_by: product.featured_media.aspect_ratio | ceil }}"
+        loading="lazy"
+        class="quiz-product-card__image"
+      >
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'quiz-product-card__image quiz-product-card__image--placeholder' }}
+    {%- endif -%}
+  </a>
+
+  <div class="quiz-product-card__info">
+    <a href="{{ product.url }}" class="quiz-product-card__title">{{ product.title }}</a>
+
+    <p class="quiz-product-card__price">
+      {%- if product.compare_at_price > product.price -%}
+        <span class="quiz-product-card__price--compare">{{ product.compare_at_price | money }}</span>
+      {%- endif -%}
+      <span>{{ product.price | money }}</span>
+    </p>
+
+    {%- if show_atc -%}
+      <form action="/cart/add" method="post" class="quiz-product-card__atc-form">
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="button quiz-product-card__atc-btn">
+          Add to Cart
+        </button>
+      </form>
+    {%- endif -%}
+  </div>
+</div>

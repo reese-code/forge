@@ -1,0 +1,606 @@
+{% comment %} FORGE SUPPLY — Skin Quiz Section {% endcomment %}
+
+{% stylesheet %}
+  .quiz-wrapper {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: var(--spacing-lg, 40px) var(--spacing-md, 20px);
+  }
+
+  /* ── Header ── */
+  .quiz-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .quiz-header__headline {
+    font-family: var(--font-header, var(--font-body));
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    color: var(--color-foreground-heading, var(--color-foreground));
+    margin: 0 0 12px;
+  }
+
+  .quiz-header__subheadline {
+    font-size: 1rem;
+    color: var(--color-foreground);
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  /* ── Progress bar ── */
+  .quiz-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .quiz-progress__bar {
+    flex: 1;
+    height: 3px;
+    background: var(--color-border, #e6e6e6);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .quiz-progress__fill {
+    height: 100%;
+    background: var(--color-foreground, #171717);
+    border-radius: 99px;
+    transition: width 0.35s ease;
+    width: 0%;
+  }
+
+  .quiz-progress__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--color-foreground);
+    opacity: 0.5;
+    white-space: nowrap;
+  }
+
+  /* ── Steps ── */
+  .quiz-step {
+    display: none;
+    animation: quiz-fade-in 0.3s ease forwards;
+  }
+
+  .quiz-step.is-active {
+    display: block;
+  }
+
+  @keyframes quiz-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .quiz-step__question {
+    font-family: var(--font-header, var(--font-body));
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    margin: 0 0 28px;
+    color: var(--color-foreground-heading, var(--color-foreground));
+  }
+
+  /* ── Options ── */
+  .quiz-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border: 1.5px solid var(--color-border, #e6e6e6);
+    border-radius: var(--border-radius, 16px);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    font-size: 0.9375rem;
+    user-select: none;
+  }
+
+  .quiz-option:hover {
+    border-color: var(--color-foreground, #171717);
+  }
+
+  .quiz-option.is-selected {
+    border-color: var(--color-foreground, #171717);
+    background: var(--color-foreground, #171717);
+    color: var(--color-background, #fff);
+  }
+
+  .quiz-option__check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .quiz-option.is-selected .quiz-option__check::after {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-background, #fff);
+  }
+
+  /* ── Nav ── */
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .quiz-nav__back {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--color-foreground);
+    opacity: 0.5;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+  }
+
+  .quiz-nav__back:hover { opacity: 1; }
+  .quiz-nav__back[hidden] { display: none; }
+
+  .quiz-nav__next {
+    margin-left: auto;
+  }
+
+  /* ── Results ── */
+  .quiz-results {
+    display: none;
+    animation: quiz-fade-in 0.3s ease forwards;
+  }
+
+  .quiz-results.is-active {
+    display: block;
+  }
+
+  .quiz-results__headline {
+    font-family: var(--font-header, var(--font-body));
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    margin: 0 0 32px;
+    color: var(--color-foreground-heading, var(--color-foreground));
+    text-align: center;
+  }
+
+  .quiz-results__loading {
+    text-align: center;
+    padding: 48px 0;
+    font-size: 0.9375rem;
+    opacity: 0.6;
+  }
+
+  .quiz-results__empty {
+    text-align: center;
+    padding: 48px 0;
+    font-size: 0.9375rem;
+    opacity: 0.6;
+  }
+
+  .quiz-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+
+  /* ── Product card ── */
+  .quiz-product-card {
+    display: flex;
+    flex-direction: column;
+    border: 1.5px solid var(--color-border, #e6e6e6);
+    border-radius: var(--border-radius, 16px);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .quiz-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  }
+
+  .quiz-product-card__image-link { display: block; }
+
+  .quiz-product-card__image {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .quiz-product-card__info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .quiz-product-card__title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-foreground-heading, var(--color-foreground));
+    text-decoration: none;
+    line-height: 1.3;
+  }
+
+  .quiz-product-card__title:hover { text-decoration: underline; }
+
+  .quiz-product-card__price {
+    font-size: 0.875rem;
+    margin: 0;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    color: var(--color-foreground);
+  }
+
+  .quiz-product-card__price--compare {
+    text-decoration: line-through;
+    opacity: 0.45;
+  }
+
+  .quiz-product-card__atc-form { margin-top: auto; }
+
+  .quiz-product-card__atc-btn {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+  }
+
+  /* ── Restart ── */
+  .quiz-results__restart {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .quiz-results__restart-btn {
+    background: none;
+    border: 1.5px solid var(--color-border, #e6e6e6);
+    border-radius: var(--border-radius, 16px);
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+  }
+
+  .quiz-results__restart-btn:hover {
+    border-color: var(--color-foreground);
+  }
+
+  @media (max-width: 600px) {
+    .quiz-options {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+{% endstylesheet %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<div class="section color-{{ section.settings.color_scheme }}">
+  <div class="quiz-wrapper" id="forge-quiz" data-storefront-token="{{ shop.metafields.forge.storefront_token | default: '' }}">
+
+    <div class="quiz-header">
+      <h1 class="quiz-header__headline">{{ section.settings.quiz_headline }}</h1>
+      <p class="quiz-header__subheadline">{{ section.settings.quiz_subheadline }}</p>
+    </div>
+
+    <div class="quiz-progress" id="quiz-progress" aria-hidden="true">
+      <div class="quiz-progress__bar">
+        <div class="quiz-progress__fill" id="quiz-progress-fill"></div>
+      </div>
+      <span class="quiz-progress__label" id="quiz-progress-label">1 / 7</span>
+    </div>
+
+    {%- comment -%} STEP 1 — Skin type {%- endcomment -%}
+    <div class="quiz-step is-active" data-step="1" data-key="skin_type" data-multi="true">
+      <p class="quiz-step__question">{{ section.settings.q1_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q1_opt1 }}<input type="checkbox" value="dry" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q1_opt2 }}<input type="checkbox" value="oily" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q1_opt3 }}<input type="checkbox" value="combination" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q1_opt4 }}<input type="checkbox" value="sensitive" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q1_opt5 }}<input type="checkbox" value="normal" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back" hidden>Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 2 — Skin concern {%- endcomment -%}
+    <div class="quiz-step" data-step="2" data-key="skin_concern" data-multi="true">
+      <p class="quiz-step__question">{{ section.settings.q2_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt1 }}<input type="checkbox" value="acne" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt2 }}<input type="checkbox" value="redness" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt3 }}<input type="checkbox" value="dryness" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt4 }}<input type="checkbox" value="fine_lines" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt5 }}<input type="checkbox" value="dark_circles" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt6 }}<input type="checkbox" value="dullness" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q2_opt7 }}<input type="checkbox" value="sun_damage" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 3 — Shave {%- endcomment -%}
+    <div class="quiz-step" data-step="3" data-key="shave" data-multi="false">
+      <p class="quiz-step__question">{{ section.settings.q3_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q3_opt1 }}<input type="radio" name="shave" value="wet" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q3_opt2 }}<input type="radio" name="shave" value="cartridge" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q3_opt3 }}<input type="radio" name="shave" value="no" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 4 — Beard {%- endcomment -%}
+    <div class="quiz-step" data-step="4" data-key="beard" data-multi="false">
+      <p class="quiz-step__question">{{ section.settings.q4_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q4_opt1 }}<input type="radio" name="beard" value="none" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q4_opt2 }}<input type="radio" name="beard" value="stubble" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q4_opt3 }}<input type="radio" name="beard" value="short" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q4_opt4 }}<input type="radio" name="beard" value="medium" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q4_opt5 }}<input type="radio" name="beard" value="long" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 5 — Hair type {%- endcomment -%}
+    <div class="quiz-step" data-step="5" data-key="hair_type" data-multi="true">
+      <p class="quiz-step__question">{{ section.settings.q5_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt1 }}<input type="checkbox" value="straight" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt2 }}<input type="checkbox" value="wavy" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt3 }}<input type="checkbox" value="curly" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt4 }}<input type="checkbox" value="coily" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt5 }}<input type="checkbox" value="fine" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q5_opt6 }}<input type="checkbox" value="thick" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 6 — Scalp {%- endcomment -%}
+    <div class="quiz-step" data-step="6" data-key="scalp_type" data-multi="false">
+      <p class="quiz-step__question">{{ section.settings.q6_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q6_opt1 }}<input type="radio" name="scalp" value="oily" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q6_opt2 }}<input type="radio" name="scalp" value="dry" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q6_opt3 }}<input type="radio" name="scalp" value="normal" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q6_opt4 }}<input type="radio" name="scalp" value="flaky" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__next" data-next>Next</button>
+      </div>
+    </div>
+
+    {%- comment -%} STEP 7 — Routine size {%- endcomment -%}
+    <div class="quiz-step" data-step="7" data-key="routine_size" data-multi="false">
+      <p class="quiz-step__question">{{ section.settings.q7_text }}</p>
+      <div class="quiz-options">
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q7_opt1 }}<input type="radio" name="routine" value="minimal" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q7_opt2 }}<input type="radio" name="routine" value="standard" hidden></label>
+        <label class="quiz-option"><span class="quiz-option__check"></span>{{ section.settings.q7_opt3 }}<input type="radio" name="routine" value="full" hidden></label>
+      </div>
+      <div class="quiz-nav">
+        <button class="quiz-nav__back">Back</button>
+        <button class="button quiz-nav__submit">See My Results</button>
+      </div>
+    </div>
+
+    {%- comment -%} Results panel {%- endcomment -%}
+    <div class="quiz-results" id="quiz-results" aria-live="polite">
+      <h2 class="quiz-results__headline">{{ section.settings.results_headline }}</h2>
+      <div id="quiz-product-grid" class="quiz-product-grid"></div>
+      <div class="quiz-results__restart">
+        <button class="quiz-results__restart-btn" id="quiz-restart">Start Over</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  window.__quizConfig = {
+    storefrontToken: {{ shop.metafields.forge.storefront_token | json }},
+    shopDomain: {{ shop.permanent_domain | json }},
+    maxResults: {{ section.settings.max_results }},
+    showAtc: {{ section.settings.show_atc }},
+    moneyFormat: {{ shop.money_format | json }},
+  };
+</script>
+{{ 'skin-quiz.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Skin Quiz",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Hero text"
+    },
+    {
+      "type": "text",
+      "id": "quiz_headline",
+      "label": "Quiz headline",
+      "default": "Build Your Routine"
+    },
+    {
+      "type": "text",
+      "id": "quiz_subheadline",
+      "label": "Quiz subheadline",
+      "default": "Answer 7 questions. Get your exact lineup."
+    },
+    {
+      "type": "text",
+      "id": "results_headline",
+      "label": "Results headline",
+      "default": "Your FORGE Routine"
+    },
+    {
+      "type": "header",
+      "content": "Results settings"
+    },
+    {
+      "type": "range",
+      "id": "max_results",
+      "label": "Max results shown",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "show_atc",
+      "label": "Show Add to Cart",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Question 1 — Skin type"
+    },
+    {
+      "type": "text",
+      "id": "q1_text",
+      "label": "Question",
+      "default": "What's your skin type?"
+    },
+    { "type": "text", "id": "q1_opt1", "label": "Option 1", "default": "Dry" },
+    { "type": "text", "id": "q1_opt2", "label": "Option 2", "default": "Oily" },
+    { "type": "text", "id": "q1_opt3", "label": "Option 3", "default": "Combination" },
+    { "type": "text", "id": "q1_opt4", "label": "Option 4", "default": "Sensitive" },
+    { "type": "text", "id": "q1_opt5", "label": "Option 5", "default": "Normal" },
+    {
+      "type": "header",
+      "content": "Question 2 — Skin concern"
+    },
+    {
+      "type": "text",
+      "id": "q2_text",
+      "label": "Question",
+      "default": "Biggest skin concern?"
+    },
+    { "type": "text", "id": "q2_opt1", "label": "Option 1", "default": "Acne" },
+    { "type": "text", "id": "q2_opt2", "label": "Option 2", "default": "Redness & Irritation" },
+    { "type": "text", "id": "q2_opt3", "label": "Option 3", "default": "Dryness" },
+    { "type": "text", "id": "q2_opt4", "label": "Option 4", "default": "Fine Lines & Aging" },
+    { "type": "text", "id": "q2_opt5", "label": "Option 5", "default": "Dark Circles & Puffiness" },
+    { "type": "text", "id": "q2_opt6", "label": "Option 6", "default": "Dullness" },
+    { "type": "text", "id": "q2_opt7", "label": "Option 7", "default": "Sun Damage" },
+    {
+      "type": "header",
+      "content": "Question 3 — Shave"
+    },
+    {
+      "type": "text",
+      "id": "q3_text",
+      "label": "Question",
+      "default": "Do you shave?"
+    },
+    { "type": "text", "id": "q3_opt1", "label": "Option 1", "default": "Yes — wet\/traditional" },
+    { "type": "text", "id": "q3_opt2", "label": "Option 2", "default": "Yes — cartridge\/electric" },
+    { "type": "text", "id": "q3_opt3", "label": "Option 3", "default": "No" },
+    {
+      "type": "header",
+      "content": "Question 4 — Beard"
+    },
+    {
+      "type": "text",
+      "id": "q4_text",
+      "label": "Question",
+      "default": "Beard?"
+    },
+    { "type": "text", "id": "q4_opt1", "label": "Option 1", "default": "No beard" },
+    { "type": "text", "id": "q4_opt2", "label": "Option 2", "default": "Stubble" },
+    { "type": "text", "id": "q4_opt3", "label": "Option 3", "default": "Short" },
+    { "type": "text", "id": "q4_opt4", "label": "Option 4", "default": "Medium" },
+    { "type": "text", "id": "q4_opt5", "label": "Option 5", "default": "Long" },
+    {
+      "type": "header",
+      "content": "Question 5 — Hair type"
+    },
+    {
+      "type": "text",
+      "id": "q5_text",
+      "label": "Question",
+      "default": "Hair type?"
+    },
+    { "type": "text", "id": "q5_opt1", "label": "Option 1", "default": "Straight" },
+    { "type": "text", "id": "q5_opt2", "label": "Option 2", "default": "Wavy" },
+    { "type": "text", "id": "q5_opt3", "label": "Option 3", "default": "Curly" },
+    { "type": "text", "id": "q5_opt4", "label": "Option 4", "default": "Coily" },
+    { "type": "text", "id": "q5_opt5", "label": "Option 5", "default": "Fine" },
+    { "type": "text", "id": "q5_opt6", "label": "Option 6", "default": "Thick" },
+    {
+      "type": "header",
+      "content": "Question 6 — Scalp"
+    },
+    {
+      "type": "text",
+      "id": "q6_text",
+      "label": "Question",
+      "default": "Scalp?"
+    },
+    { "type": "text", "id": "q6_opt1", "label": "Option 1", "default": "Oily" },
+    { "type": "text", "id": "q6_opt2", "label": "Option 2", "default": "Dry" },
+    { "type": "text", "id": "q6_opt3", "label": "Option 3", "default": "Normal" },
+    { "type": "text", "id": "q6_opt4", "label": "Option 4", "default": "Flaky" },
+    {
+      "type": "header",
+      "content": "Question 7 — Routine size"
+    },
+    {
+      "type": "text",
+      "id": "q7_text",
+      "label": "Question",
+      "default": "How big is your routine?"
+    },
+    { "type": "text", "id": "q7_opt1", "label": "Option 1", "default": "Minimal (1–2 products)" },
+    { "type": "text", "id": "q7_opt2", "label": "Option 2", "default": "Standard (3–4 products)" },
+    { "type": "text", "id": "q7_opt3", "label": "Option 3", "default": "Full (5+ products)" }
+  ],
+  "presets": [
+    {
+      "name": "Skin Quiz"
+    }
+  ]
+}
+{% endschema %}
