@@ -7,18 +7,6 @@
   const SHOP_DOMAIN = cfg.shopDomain || '';
   const MAX_RESULTS = cfg.maxResults || 6;
   const SHOW_ATC = cfg.showAtc !== false;
-  const NAMESPACE = 'quiz';
-
-  // Map quiz answer keys to metafield keys
-  const ANSWER_META_MAP = {
-    skin_type:    'skin_type',
-    skin_concern: 'skin_concern',
-    shave:        'shave_step',
-    beard:        'beard_length',
-    hair_type:    'hair_type',
-    scalp_type:   'scalp_type',
-    routine_size: null, // used only for cap, not direct match
-  };
 
   const ROUTINE_CAP = { minimal: 2, standard: 4, full: 99 };
 
@@ -147,6 +135,7 @@
             title
             handle
             url: onlineStoreUrl
+            tags
             priceRange {
               minVariantPrice { amount currencyCode }
             }
@@ -156,25 +145,6 @@
             featuredImage { url altText }
             variants(first: 1) {
               edges { node { id availableForSale } }
-            }
-            metafields(identifiers: [
-              {namespace: "${NAMESPACE}", key: "skin_type"},
-              {namespace: "${NAMESPACE}", key: "skin_concern"},
-              {namespace: "${NAMESPACE}", key: "shave_step"},
-              {namespace: "${NAMESPACE}", key: "beard_length"},
-              {namespace: "${NAMESPACE}", key: "has_beard"},
-              {namespace: "${NAMESPACE}", key: "hair_type"},
-              {namespace: "${NAMESPACE}", key: "scalp_type"},
-              {namespace: "${NAMESPACE}", key: "routine_step"},
-              {namespace: "${NAMESPACE}", key: "time_of_day"},
-              {namespace: "${NAMESPACE}", key: "hold_level"},
-              {namespace: "${NAMESPACE}", key: "texture"},
-              {namespace: "${NAMESPACE}", key: "beard_concern"},
-              {namespace: "${NAMESPACE}", key: "hair_concern"}
-            ]) {
-              key
-              value
-              type
             }
           }
         }
@@ -197,70 +167,48 @@
     }
   }
 
-  function parseMetaValue(mf) {
-    if (!mf) return null;
-    if (mf.type === 'boolean') return mf.value === 'true';
-    if (mf.type === 'number_integer') return parseInt(mf.value, 10);
-    if (mf.type && mf.type.startsWith('list.')) {
-      try { return JSON.parse(mf.value); } catch { return [mf.value]; }
-    }
-    return mf.value;
-  }
-
-  function getMetaMap(product) {
-    const map = {};
-    (product.metafields || []).forEach(mf => {
-      if (mf) map[mf.key] = parseMetaValue(mf);
-    });
-    return map;
-  }
-
-  function arraysOverlap(a, b) {
-    const setA = new Set(Array.isArray(a) ? a : [a]);
-    return (Array.isArray(b) ? b : [b]).some(v => setA.has(v) || setA.has('all'));
-  }
-
   // ── Ranking ────────────────────────────────────────────────────────────────
   function rankProducts(products) {
     const cap = ROUTINE_CAP[answers.routine_size?.[0]] ?? 99;
 
     return products
       .map(product => {
-        const meta = getMetaMap(product);
+        const tags = new Set((product.tags || []).map(t => t.toLowerCase()));
         let score = 0;
 
-        // skin_type match
-        if (answers.skin_type?.length && meta.skin_type) {
-          if (arraysOverlap(meta.skin_type, answers.skin_type)) score += 3;
-        }
+        // skin_type — 3 pts per matching tag
+        (answers.skin_type || []).forEach(v => {
+          if (tags.has(v.toLowerCase())) score += 3;
+        });
 
-        // skin_concern match
-        if (answers.skin_concern?.length && meta.skin_concern) {
-          const overlap = answers.skin_concern.filter(c =>
-            Array.isArray(meta.skin_concern) ? meta.skin_concern.includes(c) : meta.skin_concern === c
-          );
-          score += overlap.length * 2;
-        }
+        // skin_concern — 2 pts per matching tag
+        (answers.skin_concern || []).forEach(v => {
+          if (tags.has(v.toLowerCase())) score += 2;
+        });
 
-        // beard match
+        // shave — 1 pt if tag matches selected shave style
+        (answers.shave || []).forEach(v => {
+          if (tags.has(v.toLowerCase())) score += 1;
+        });
+
+        // beard — 2 pts if product has a beard tag, 1 pt for specific length match
         if (answers.beard?.[0] && answers.beard[0] !== 'none') {
-          if (meta.has_beard === true) score += 2;
-          if (meta.beard_length && arraysOverlap(meta.beard_length, answers.beard)) score += 1;
+          if (tags.has('beard')) score += 2;
+          if (tags.has(answers.beard[0].toLowerCase())) score += 1;
         }
 
-        // hair_type match
-        if (answers.hair_type?.length && meta.hair_type) {
-          if (arraysOverlap(meta.hair_type, answers.hair_type)) score += 2;
-        }
+        // hair_type — 2 pts per matching tag
+        (answers.hair_type || []).forEach(v => {
+          if (tags.has(v.toLowerCase())) score += 2;
+        });
 
-        // scalp match
-        if (answers.scalp_type?.[0] && meta.scalp_type) {
-          if (meta.scalp_type === answers.scalp_type[0]) score += 2;
-        }
+        // scalp_type — 2 pts if tag matches
+        (answers.scalp_type || []).forEach(v => {
+          if (tags.has(v.toLowerCase())) score += 2;
+        });
 
         return { product, score };
       })
-      .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, cap)
       .map(({ product }) => product);
