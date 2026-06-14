@@ -102,7 +102,8 @@
 
   // ── Option selection ───────────────────────────────────────────────────────
   document.querySelectorAll('.quiz-option').forEach(opt => {
-    opt.addEventListener('click', () => {
+    opt.addEventListener('click', e => {
+      e.preventDefault();
       const step = opt.closest('.quiz-step');
       const multi = step.dataset.multi === 'true';
       if (!multi) {
