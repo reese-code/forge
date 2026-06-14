@@ -120,7 +120,7 @@
       "settings": {
         "logo": "shopify://shop_images/forge_small_logo.svg",
         "logo_height": 65,
-        "logo_height_mobile": 40,
+        "logo_height_mobile": 65,
         "content_width": "two-thirds",
         "content_position": "right",
         "text_layout": "wrap",
@@ -392,6 +392,108 @@
         "padding-block-end": 48
       }
     },
+    "hero_kT478m": {
+      "type": "hero",
+      "blocks": {
+        "text_MccHxh": {
+          "type": "text",
+          "settings": {
+            "text": "<h2>Build your routine</h2>",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "left",
+            "type_preset": "h1",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_FXLPgV": {
+          "type": "text",
+          "settings": {
+            "text": "<p>A quiz to build a skincare routine tailored to your wants and needs.</p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "button_DRDiKd": {
+          "type": "button",
+          "name": "t:names.button",
+          "settings": {
+            "label": "Build routine",
+            "link": "shopify://pages/skin-quiz",
+            "open_in_new_tab": false,
+            "style_class": "button",
+            "width": "custom",
+            "custom_width": 50,
+            "width_mobile": "custom",
+            "custom_width_mobile": 100
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_MccHxh",
+        "text_FXLPgV",
+        "button_DRDiKd"
+      ],
+      "name": "t:names.hero",
+      "settings": {
+        "link": "",
+        "open_in_new_tab": false,
+        "media_type_1": "image",
+        "media_type_2": "image",
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "flex-end",
+        "gap": 16,
+        "section_width": "page-width",
+        "section_height": "small",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-5",
+        "toggle_overlay": true,
+        "overlay_color": "#00000026",
+        "overlay_style": "gradient",
+        "gradient_direction": "to top",
+        "blurred_reflection": false,
+        "reflection_opacity": 75,
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
     "collection_showcase_MWkDfz": {
       "type": "collection-showcase",
       "blocks": {
@@ -400,7 +502,7 @@
           "settings": {
             "collection": "shave",
             "slide_title": "",
-            "slide_description": "Dasdfsadfasdsadfasdfasdfasdd",
+            "slide_description": "",
             "button_label": "Shop collection",
             "button_link": "",
             "toggle_overlay": true,
@@ -494,12 +596,52 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "v2_testimonials_WKMwix": {
+      "type": "v2-testimonials",
+      "blocks": {
+        "testimonial_yx4hWb": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "STATELY'S BEEN A GAME-CHANGER. FOUR BOXES IN, NOT A SINGLE MISS. I LOOK AND FEEL GREAT - THANKS NATALIE!",
+            "instagram_handle": "",
+            "size": "medium"
+          }
+        },
+        "testimonial_kJRx4U": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "STATELY'S BEEN A GAME-CHANGER. FOUR BOXES IN, NOT A SINGLE MISS. I LOOK AND FEEL GREAT - THANKS NATALIE!",
+            "instagram_handle": "",
+            "size": "medium"
+          }
+        },
+        "testimonial_TVAY4d": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "STATELY'S BEEN A GAME-CHANGER. FOUR BOXES IN, NOT A SINGLE MISS. I LOOK AND FEEL GREAT - THANKS NATALIE!",
+            "instagram_handle": "",
+            "size": "medium"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_yx4hWb",
+        "testimonial_kJRx4U",
+        "testimonial_TVAY4d"
+      ],
+      "name": "Testimonials",
+      "settings": {
+        "title": "TRUSTED BY OVER 100,000 MEN"
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
     "logo_with_text_tEWjDK",
     "product_list_AHGCT4",
-    "collection_showcase_MWkDfz"
+    "hero_kT478m",
+    "collection_showcase_MWkDfz",
+    "v2_testimonials_WKMwix"
   ]
 }
