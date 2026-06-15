@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('type','commonjs'\\)\\)\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([s.get\\('name'\\) for s in d]\\)\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(grep -E '\\\\.\\(liquid|js|css\\)$')"
     ]
   }
 }

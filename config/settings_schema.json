@@ -2103,6 +2103,31 @@
         "label": "t:settings.mobile_quick_add",
         "default": false,
         "visible_if": "{{ settings.quick_add == true }}"
+      },
+      {
+        "type": "header",
+        "content": "Corner style"
+      },
+      {
+        "type": "select",
+        "id": "card_corner_style",
+        "label": "Card image corner style",
+        "options": [
+          { "value": "border_radius", "label": "Rounded" },
+          { "value": "cutout", "label": "Cutout (diagonal)" }
+        ],
+        "default": "border_radius"
+      },
+      {
+        "type": "range",
+        "id": "card_cutout_size",
+        "label": "Cutout size",
+        "min": 0,
+        "max": 60,
+        "step": 2,
+        "unit": "px",
+        "default": 16,
+        "visible_if": "{{ settings.card_corner_style == 'cutout' }}"
       }
     ]
   },

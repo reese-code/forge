@@ -194,54 +194,82 @@
     opacity: 0.6;
   }
 
-  .quiz-product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 24px;
-  }
-
-  /* ── Product card ── */
-  .quiz-product-card {
+  /* ── Add Routine banner ── */
+  .quiz-add-routine {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
     border: 1.5px solid var(--color-border, #e6e6e6);
-    border-radius: var(--border-radius, 16px);
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: var(--style-border-radius-sm, 8px);
+    flex-wrap: wrap;
   }
 
-  .quiz-product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  .quiz-add-routine__label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-foreground-heading, var(--color-foreground));
   }
 
-  .quiz-product-card__image-link { display: block; }
-
-  .quiz-product-card__image {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-  }
-
-  .quiz-product-card__info {
-    padding: 16px;
+  /* ── Product list ── */
+  .quiz-product-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex: 1;
+    gap: 0;
   }
 
-  .quiz-product-card__title {
+  .quiz-product-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-border, #e6e6e6);
+  }
+
+  .quiz-product-row:first-child {
+    border-top: 1px solid var(--color-border, #e6e6e6);
+  }
+
+  .quiz-product-row__image-link {
+    flex-shrink: 0;
+    display: block;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--style-border-radius-sm, 6px);
+    overflow: hidden;
+  }
+
+  .quiz-product-row__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .quiz-product-row__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .quiz-product-row__title {
     font-size: 0.9375rem;
     font-weight: 500;
     color: var(--color-foreground-heading, var(--color-foreground));
     text-decoration: none;
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .quiz-product-card__title:hover { text-decoration: underline; }
+  .quiz-product-row__title:hover { text-decoration: underline; }
 
-  .quiz-product-card__price {
+  .quiz-product-row__price {
     font-size: 0.875rem;
     margin: 0;
     display: flex;
@@ -250,17 +278,19 @@
     color: var(--color-foreground);
   }
 
-  .quiz-product-card__price--compare {
+  .quiz-product-row__price--compare {
     text-decoration: line-through;
     opacity: 0.45;
   }
 
-  .quiz-product-card__atc-form { margin-top: auto; }
+  .quiz-product-row__actions {
+    flex-shrink: 0;
+  }
 
-  .quiz-product-card__atc-btn {
-    width: 100%;
-    padding: 10px 16px;
+  .quiz-product-row__atc-btn {
+    padding: 10px 20px;
     font-size: 0.875rem;
+    white-space: nowrap;
   }
 
   /* ── Restart ── */
@@ -272,7 +302,7 @@
   .quiz-results__restart-btn {
     background: none;
     border: 1.5px solid var(--color-border, #e6e6e6);
-    border-radius: var(--border-radius, 16px);
+    border-radius: var(--style-border-radius-sm, 8px);
     padding: 10px 24px;
     cursor: pointer;
     font-size: 0.875rem;
@@ -286,6 +316,16 @@
   @media (max-width: 600px) {
     .quiz-options {
       grid-template-columns: 1fr 1fr;
+    }
+
+    .quiz-add-routine {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .quiz-product-row__atc-btn {
+      padding: 8px 14px;
+      font-size: 0.8125rem;
     }
   }
 {% endstylesheet %}
@@ -420,7 +460,11 @@
     {%- comment -%} Results panel {%- endcomment -%}
     <div class="quiz-results" id="quiz-results" aria-live="polite">
       <h2 class="quiz-results__headline">{{ section.settings.results_headline }}</h2>
-      <div id="quiz-product-grid" class="quiz-product-grid"></div>
+      <div id="quiz-add-routine" class="quiz-add-routine" hidden>
+        <span class="quiz-add-routine__label">Add your full routine to cart</span>
+        <button class="button" id="quiz-add-all-btn">Add All to Cart</button>
+      </div>
+      <div id="quiz-product-list" class="quiz-product-list"></div>
       <div class="quiz-results__restart">
         <button class="quiz-results__restart-btn" id="quiz-restart">Start Over</button>
       </div>

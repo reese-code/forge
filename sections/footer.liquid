@@ -6,8 +6,20 @@
   "
   style="
     background-color: var(--color-background);
-    border-top-left-radius: {{ section.settings.border_radius_top_left }}px;
-    border-top-right-radius: {{ section.settings.border_radius_top_right }}px;
+    {% if section.settings.corner_style == 'cutout' %}
+      {% assign cs = section.settings.cutout_size %}
+      clip-path: polygon(
+        {{ cs }}px 0%,
+        calc(100% - {{ cs }}px) 0%,
+        100% {{ cs }}px,
+        100% 100%,
+        0% 100%,
+        0% {{ cs }}px
+      );
+    {% else %}
+      border-top-left-radius: {{ section.settings.border_radius_top_left }}px;
+      border-top-right-radius: {{ section.settings.border_radius_top_right }}px;
+    {% endif %}
     overflow: hidden;
   "
 >
@@ -284,6 +296,16 @@
       "default": "scheme-1"
     },
     {
+      "type": "select",
+      "id": "corner_style",
+      "label": "Top corner style",
+      "options": [
+        { "value": "border_radius", "label": "Rounded" },
+        { "value": "cutout", "label": "Cutout (diagonal)" }
+      ],
+      "default": "border_radius"
+    },
+    {
       "type": "range",
       "id": "border_radius_top_left",
       "label": "Top left corner radius",
@@ -291,7 +313,8 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ section.settings.corner_style == 'border_radius' }}"
     },
     {
       "type": "range",
@@ -301,7 +324,19 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ section.settings.corner_style == 'border_radius' }}"
+    },
+    {
+      "type": "range",
+      "id": "cutout_size",
+      "label": "Cutout size",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40,
+      "visible_if": "{{ section.settings.corner_style == 'cutout' }}"
     },
     {
       "type": "select",

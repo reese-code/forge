@@ -190,6 +190,25 @@
   }
 {% endstylesheet %}
 
+{% if settings.card_corner_style == 'cutout' %}
+  {% assign ccs = settings.card_cutout_size %}
+  {% style %}
+    .card-gallery-{{ block.id }} {
+      clip-path: polygon(
+        {{ ccs }}px 0%,
+        calc(100% - {{ ccs }}px) 0%,
+        100% {{ ccs }}px,
+        100% calc(100% - {{ ccs }}px),
+        calc(100% - {{ ccs }}px) 100%,
+        {{ ccs }}px 100%,
+        0% calc(100% - {{ ccs }}px),
+        0% {{ ccs }}px
+      );
+      border-radius: 0 !important;
+    }
+  {% endstyle %}
+{% endif %}
+
 {% liquid
   assign product = block.settings.product
 

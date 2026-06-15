@@ -22,6 +22,22 @@
 
 {% assign link = link | default: block.settings.link %}
 
+{% if block.settings.corner_style == 'cutout' %}
+  {% assign cs = block.settings.cutout_size %}
+  {% case block.settings.cutout_corners %}
+    {% when 'all' %}
+      {% capture cutout_clip %}polygon({{ cs }}px 0%, calc(100% - {{ cs }}px) 0%, 100% {{ cs }}px, 100% calc(100% - {{ cs }}px), calc(100% - {{ cs }}px) 100%, {{ cs }}px 100%, 0% calc(100% - {{ cs }}px), 0% {{ cs }}px){% endcapture %}
+    {% when 'top-left' %}
+      {% capture cutout_clip %}polygon({{ cs }}px 0%, 100% 0%, 100% 100%, 0% 100%, 0% {{ cs }}px){% endcapture %}
+    {% when 'top-right' %}
+      {% capture cutout_clip %}polygon(0% 0%, calc(100% - {{ cs }}px) 0%, 100% {{ cs }}px, 100% 100%, 0% 100%){% endcapture %}
+    {% when 'bottom-right' %}
+      {% capture cutout_clip %}polygon(0% 0%, 100% 0%, 100% calc(100% - {{ cs }}px), calc(100% - {{ cs }}px) 100%, 0% 100%){% endcapture %}
+    {% when 'bottom-left' %}
+      {% capture cutout_clip %}polygon(0% 0%, 100% 0%, 100% 100%, {{ cs }}px 100%, 0% calc(100% - {{ cs }}px)){% endcapture %}
+  {% endcase %}
+{% endif %}
+
 <a
   {% if link == blank %}
     role="link"
@@ -34,7 +50,7 @@
     {{ block.settings.style_class }}
     {{ block.settings.style_class }}--{{ block.id }}
   "
-  style="{% render 'size-style', settings: block.settings %}"
+  style="{% render 'size-style', settings: block.settings %}{% if cutout_clip %} clip-path: {{ cutout_clip }}; border-radius: 0;{% endif %}"
   {%- if block.settings.open_in_new_tab -%}
     target="_blank"
     rel="noopener noreferrer"

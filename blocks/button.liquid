@@ -45,6 +45,45 @@
     },
     {
       "type": "header",
+      "content": "Corner style"
+    },
+    {
+      "type": "select",
+      "id": "corner_style",
+      "label": "Corner style",
+      "options": [
+        { "value": "default", "label": "Default (theme setting)" },
+        { "value": "cutout", "label": "Cutout (diagonal)" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "select",
+      "id": "cutout_corners",
+      "label": "Cutout corners",
+      "options": [
+        { "value": "all", "label": "All corners" },
+        { "value": "top-left", "label": "Top left only" },
+        { "value": "top-right", "label": "Top right only" },
+        { "value": "bottom-left", "label": "Bottom left only" },
+        { "value": "bottom-right", "label": "Bottom right only" }
+      ],
+      "default": "all",
+      "visible_if": "{{ block.settings.corner_style == 'cutout' }}"
+    },
+    {
+      "type": "range",
+      "id": "cutout_size",
+      "label": "Cutout size",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+      "visible_if": "{{ block.settings.corner_style == 'cutout' }}"
+    },
+    {
+      "type": "header",
       "content": "t:content.size"
     },
     {

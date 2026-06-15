@@ -20,7 +20,9 @@
   const progressFill  = document.getElementById('quiz-progress-fill');
   const progressLabel = document.getElementById('quiz-progress-label');
   const resultsPanel  = document.getElementById('quiz-results');
-  const productGrid   = document.getElementById('quiz-product-grid');
+  const productList   = document.getElementById('quiz-product-list');
+  const addRoutineBar = document.getElementById('quiz-add-routine');
+  const addAllBtn     = document.getElementById('quiz-add-all-btn');
   const restartBtn    = document.getElementById('quiz-restart');
 
   // ── Progress ───────────────────────────────────────────────────────────────
@@ -81,7 +83,8 @@
     steps.forEach(s => s.classList.remove('is-active'));
     document.getElementById('quiz-progress').setAttribute('aria-hidden', 'true');
     resultsPanel.classList.add('is-active');
-    productGrid.innerHTML = '<p class="quiz-results__loading">Finding your routine…</p>';
+    productList.innerHTML = '<p class="quiz-results__loading">Finding your routine…</p>';
+    addRoutineBar.hidden = true;
 
     const products = await fetchAllProducts();
     const ranked = rankProducts(products);
@@ -119,6 +122,8 @@
     });
     currentIndex = 0;
     resultsPanel.classList.remove('is-active');
+    productList.innerHTML = '';
+    addRoutineBar.hidden = true;
     document.getElementById('quiz-progress').removeAttribute('aria-hidden');
     showStep(0);
   });
@@ -279,73 +284,108 @@
     }
   }
 
+  async function addToCart(variantId) {
+    await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: variantId, quantity: 1 }),
+    });
+    document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+  }
+
   function renderResults(products) {
     if (products.length === 0) {
-      productGrid.innerHTML = '<p class="quiz-results__empty">No exact matches — try a different selection.</p>';
+      productList.innerHTML = '<p class="quiz-results__empty">No exact matches — try a different selection.</p>';
+      addRoutineBar.hidden = true;
       return;
     }
 
-    productGrid.innerHTML = products.map(p => {
+    const availableProducts = products.filter(p => {
+      const v = p.variants?.edges?.[0]?.node;
+      return v?.availableForSale && v?.id;
+    });
+
+    productList.innerHTML = products.map(p => {
       const price = p.priceRange?.minVariantPrice;
       const comparePrice = p.compareAtPriceRange?.minVariantPrice;
       const variantId = p.variants?.edges?.[0]?.node?.id?.replace('gid://shopify/ProductVariant/', '');
       const available = p.variants?.edges?.[0]?.node?.availableForSale;
+      const url = p.url || '/products/' + p.handle;
+
       const img = p.featuredImage?.url
-        ? `<img src="${p.featuredImage.url}" alt="${(p.featuredImage.altText || p.title).replace(/"/g, '&quot;')}" loading="lazy" class="quiz-product-card__image">`
-        : `<div class="quiz-product-card__image quiz-product-card__image--placeholder"></div>`;
+        ? `<img src="${p.featuredImage.url}" alt="${(p.featuredImage.altText || p.title).replace(/"/g, '&quot;')}" loading="lazy" class="quiz-product-row__image">`
+        : `<div class="quiz-product-row__image" style="background:var(--color-border,#eee)"></div>`;
 
       const compareHtml = comparePrice && parseFloat(comparePrice.amount) > parseFloat(price?.amount || 0)
-        ? `<span class="quiz-product-card__price--compare">${formatMoney(comparePrice.amount, comparePrice.currencyCode)}</span>`
+        ? `<span class="quiz-product-row__price--compare">${formatMoney(comparePrice.amount, comparePrice.currencyCode)}</span>`
         : '';
 
-      const atcHtml = SHOW_ATC && available && variantId ? `
-        <form action="/cart/add" method="post" class="quiz-product-card__atc-form quiz-atc-form">
-          <input type="hidden" name="id" value="${variantId}">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="button quiz-product-card__atc-btn">Add to Cart</button>
-        </form>` : '';
+      const atcHtml = SHOW_ATC && available && variantId
+        ? `<button class="button quiz-product-row__atc-btn" data-variant-id="${variantId}">Add to Cart</button>`
+        : '';
 
       return `
-        <div class="quiz-product-card">
-          <a href="${p.url || '/products/' + p.handle}" class="quiz-product-card__image-link">${img}</a>
-          <div class="quiz-product-card__info">
-            <a href="${p.url || '/products/' + p.handle}" class="quiz-product-card__title">${p.title}</a>
-            <p class="quiz-product-card__price">
+        <div class="quiz-product-row">
+          <a href="${url}" class="quiz-product-row__image-link">${img}</a>
+          <div class="quiz-product-row__info">
+            <a href="${url}" class="quiz-product-row__title">${p.title}</a>
+            <p class="quiz-product-row__price">
               ${compareHtml}
               <span>${price ? formatMoney(price.amount, price.currencyCode) : ''}</span>
             </p>
-            ${atcHtml}
           </div>
+          ${atcHtml ? `<div class="quiz-product-row__actions">${atcHtml}</div>` : ''}
         </div>`;
     }).join('');
 
-    // ATC form handler — use /cart/add.js for cart drawer compatibility
-    productGrid.querySelectorAll('.quiz-atc-form').forEach(form => {
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
-        const btn = form.querySelector('button');
-        const varId = form.querySelector('input[name="id"]').value;
+    // Per-row ATC buttons
+    productList.querySelectorAll('.quiz-product-row__atc-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const varId = btn.dataset.variantId;
         btn.disabled = true;
         btn.textContent = 'Adding…';
         try {
-          await fetch('/cart/add.js', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: varId, quantity: 1 }),
-          });
+          await addToCart(varId);
           btn.textContent = 'Added!';
-          // Dispatch Shopify cart update event for drawers
-          document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
         } catch {
-          btn.textContent = 'Error — try again';
+          btn.textContent = 'Error';
         } finally {
-          setTimeout(() => {
-            btn.textContent = 'Add to Cart';
-            btn.disabled = false;
-          }, 2000);
+          setTimeout(() => { btn.textContent = 'Add to Cart'; btn.disabled = false; }, 2000);
         }
       });
     });
+
+    // Show "Add All" bar only if there are available products
+    if (SHOW_ATC && availableProducts.length > 1) {
+      addRoutineBar.hidden = false;
+      addAllBtn.onclick = async () => {
+        addAllBtn.disabled = true;
+        addAllBtn.textContent = 'Adding…';
+        try {
+          const items = availableProducts.map(p => ({
+            id: p.variants.edges[0].node.id.replace('gid://shopify/ProductVariant/', ''),
+            quantity: 1,
+          }));
+          await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items }),
+          });
+          document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+          addAllBtn.textContent = 'Added!';
+          // Update all row buttons
+          productList.querySelectorAll('.quiz-product-row__atc-btn').forEach(b => {
+            b.textContent = 'Added!';
+          });
+        } catch {
+          addAllBtn.textContent = 'Error — try again';
+        } finally {
+          setTimeout(() => { addAllBtn.textContent = 'Add All to Cart'; addAllBtn.disabled = false; }, 2500);
+        }
+      };
+    } else {
+      addRoutineBar.hidden = true;
+    }
   }
 
   // ── Customer metafield persistence ─────────────────────────────────────────
