@@ -431,14 +431,14 @@
 
 <script>
   window.__quizConfig = {
-    storefrontToken: {{ shop.metafields.forge.storefront_token | json }},
+    storefrontToken: {{ settings.quiz_storefront_token | json }},
     shopDomain: {{ shop.permanent_domain | json }},
     maxResults: {{ section.settings.max_results }},
     showAtc: {{ section.settings.show_atc }},
     moneyFormat: {{ shop.money_format | json }},
   };
 </script>
-{{ 'skin-quiz.js' | asset_url | script_tag }}
+<script src="{{ 'skin-quiz.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

@@ -127,6 +127,12 @@
   async function fetchAllProducts() {
     if (!STOREFRONT_TOKEN || !SHOP_DOMAIN) return [];
 
+    const METAFIELD_IDENTIFIERS = [
+      'skin_type','skin_concern','shave_step','beard_length','beard_concern',
+      'has_beard','hair_type','scalp_type','routine_step','time_of_day',
+      'hold_level','fragrance_free','alcohol_free','sulfate_free',
+    ].map(key => `{ namespace: "quiz", key: "${key}" }`).join('\n          ');
+
     const query = `{
       products(first: 250) {
         edges {
@@ -145,6 +151,12 @@
             featuredImage { url altText }
             variants(first: 1) {
               edges { node { id availableForSale } }
+            }
+            metafields(identifiers: [
+              ${METAFIELD_IDENTIFIERS}
+            ]) {
+              key
+              value
             }
           }
         }
@@ -168,44 +180,88 @@
   }
 
   // ── Ranking ────────────────────────────────────────────────────────────────
+  function parseMetafieldValues(metafields) {
+    const map = {};
+    (metafields || []).forEach(mf => {
+      if (!mf) return;
+      try {
+        map[mf.key] = JSON.parse(mf.value);
+      } catch {
+        map[mf.key] = mf.value;
+      }
+    });
+    return map;
+  }
+
+  function matchesAny(haystack, needles) {
+    if (!needles || needles.length === 0) return false;
+    const hay = Array.isArray(haystack) ? haystack.map(v => String(v).toLowerCase()) : [String(haystack).toLowerCase()];
+    return needles.some(n => hay.includes(n.toLowerCase()));
+  }
+
   function rankProducts(products) {
     const cap = ROUTINE_CAP[answers.routine_size?.[0]] ?? 99;
 
     return products
       .map(product => {
+        const mf = parseMetafieldValues(product.metafields);
+        const hasMetafields = Object.keys(mf).length > 0;
         const tags = new Set((product.tags || []).map(t => t.toLowerCase()));
         let score = 0;
 
-        // skin_type — 3 pts per matching tag
-        (answers.skin_type || []).forEach(v => {
-          if (tags.has(v.toLowerCase())) score += 3;
-        });
+        if (hasMetafields) {
+          // skin_type — 3 pts per matching value
+          (answers.skin_type || []).forEach(v => {
+            if (matchesAny(mf.skin_type, [v])) score += 3;
+          });
 
-        // skin_concern — 2 pts per matching tag
-        (answers.skin_concern || []).forEach(v => {
-          if (tags.has(v.toLowerCase())) score += 2;
-        });
+          // skin_concern — 2 pts per matching value
+          (answers.skin_concern || []).forEach(v => {
+            if (matchesAny(mf.skin_concern, [v])) score += 2;
+          });
 
-        // shave — 1 pt if tag matches selected shave style
-        (answers.shave || []).forEach(v => {
-          if (tags.has(v.toLowerCase())) score += 1;
-        });
+          // shave — 1 pt if shave_step matches
+          (answers.shave || []).forEach(v => {
+            if (matchesAny(mf.shave_step, [v])) score += 1;
+          });
 
-        // beard — 2 pts if product has a beard tag, 1 pt for specific length match
-        if (answers.beard?.[0] && answers.beard[0] !== 'none') {
-          if (tags.has('beard')) score += 2;
-          if (tags.has(answers.beard[0].toLowerCase())) score += 1;
+          // beard — 2 pts for has_beard, 1 pt for beard_length match
+          if (answers.beard?.[0] && answers.beard[0] !== 'none') {
+            if (mf.has_beard === true || mf.has_beard === 'true') score += 2;
+            if (matchesAny(mf.beard_length, [answers.beard[0]])) score += 1;
+          }
+
+          // hair_type — 2 pts per matching value
+          (answers.hair_type || []).forEach(v => {
+            if (matchesAny(mf.hair_type, [v])) score += 2;
+          });
+
+          // scalp_type — 2 pts if matches
+          (answers.scalp_type || []).forEach(v => {
+            if (matchesAny(mf.scalp_type, [v])) score += 2;
+          });
+        } else {
+          // Fallback: tag-based scoring for products without metafields
+          (answers.skin_type || []).forEach(v => {
+            if (tags.has(v.toLowerCase())) score += 3;
+          });
+          (answers.skin_concern || []).forEach(v => {
+            if (tags.has(v.toLowerCase())) score += 2;
+          });
+          (answers.shave || []).forEach(v => {
+            if (tags.has(v.toLowerCase())) score += 1;
+          });
+          if (answers.beard?.[0] && answers.beard[0] !== 'none') {
+            if (tags.has('beard')) score += 2;
+            if (tags.has(answers.beard[0].toLowerCase())) score += 1;
+          }
+          (answers.hair_type || []).forEach(v => {
+            if (tags.has(v.toLowerCase())) score += 2;
+          });
+          (answers.scalp_type || []).forEach(v => {
+            if (tags.has(v.toLowerCase())) score += 2;
+          });
         }
-
-        // hair_type — 2 pts per matching tag
-        (answers.hair_type || []).forEach(v => {
-          if (tags.has(v.toLowerCase())) score += 2;
-        });
-
-        // scalp_type — 2 pts if tag matches
-        (answers.scalp_type || []).forEach(v => {
-          if (tags.has(v.toLowerCase())) score += 2;
-        });
 
         return { product, score };
       })

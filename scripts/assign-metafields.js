@@ -16,6 +16,32 @@ const NAMESPACE = 'quiz';
 const API_VERSION = '2024-10';
 const ENDPOINT = `https://${SHOPIFY_STORE}/admin/api/${API_VERSION}/graphql.json`;
 
+// Definitions to create before assigning values.
+// type must match what inferType() would produce for that key.
+const DEFINITIONS = [
+  { key: 'skin_type',       type: 'list.single_line_text_field', name: 'Skin Type' },
+  { key: 'skin_concern',    type: 'list.single_line_text_field', name: 'Skin Concern' },
+  { key: 'shave_step',      type: 'single_line_text_field',      name: 'Shave Step' },
+  { key: 'beard_length',    type: 'list.single_line_text_field', name: 'Beard Length' },
+  { key: 'beard_concern',   type: 'list.single_line_text_field', name: 'Beard Concern' },
+  { key: 'has_beard',       type: 'boolean',                     name: 'Has Beard' },
+  { key: 'hair_type',       type: 'list.single_line_text_field', name: 'Hair Type' },
+  { key: 'scalp_type',      type: 'single_line_text_field',      name: 'Scalp Type' },
+  { key: 'routine_step',    type: 'single_line_text_field',      name: 'Routine Step' },
+  { key: 'time_of_day',     type: 'list.single_line_text_field', name: 'Time of Day' },
+  { key: 'hold_level',      type: 'single_line_text_field',      name: 'Hold Level' },
+  { key: 'lather_preference', type: 'single_line_text_field',   name: 'Lather Preference' },
+  { key: 'texture',         type: 'single_line_text_field',      name: 'Texture' },
+  { key: 'target_zone',     type: 'single_line_text_field',      name: 'Target Zone' },
+  { key: 'finish',          type: 'single_line_text_field',      name: 'Finish' },
+  { key: 'use_frequency',   type: 'single_line_text_field',      name: 'Use Frequency' },
+  { key: 'fragrance_free',  type: 'boolean',                     name: 'Fragrance Free' },
+  { key: 'alcohol_free',    type: 'boolean',                     name: 'Alcohol Free' },
+  { key: 'sulfate_free',    type: 'boolean',                     name: 'Sulfate Free' },
+  { key: 'spf',             type: 'number_integer',              name: 'SPF' },
+  { key: 'beard_type',      type: 'single_line_text_field',      name: 'Beard Type' },
+];
+
 // Metafield map — handle: { key: value }
 const PRODUCTS = {
   'pre-shave-oil':           { skin_type: ['dry','normal','sensitive'], skin_concern: ['razor_burn','irritation','ingrown_hairs'], shave_step: 'pre_shave', beard_type: 'all' },
@@ -97,7 +123,58 @@ async function assignMetafields(productId, metafields) {
   return data.productUpdate.product;
 }
 
+async function ensureDefinitions() {
+  // Fetch existing definitions so we don't try to create duplicates
+  const existing = await gql(`
+    query {
+      metafieldDefinitions(ownerType: PRODUCT, first: 250) {
+        edges { node { namespace key } }
+      }
+    }
+  `);
+  const existingKeys = new Set(
+    existing.metafieldDefinitions.edges
+      .filter(e => e.node.namespace === NAMESPACE)
+      .map(e => e.node.key)
+  );
+
+  for (const def of DEFINITIONS) {
+    if (existingKeys.has(def.key)) {
+      console.log(`DEF   quiz.${def.key} — already exists`);
+      continue;
+    }
+    try {
+      const data = await gql(`
+        mutation createDef($definition: MetafieldDefinitionInput!) {
+          metafieldDefinitionCreate(definition: $definition) {
+            createdDefinition { id key }
+            userErrors { field message }
+          }
+        }
+      `, {
+        definition: {
+          name: def.name,
+          namespace: NAMESPACE,
+          key: def.key,
+          type: def.type,
+          ownerType: 'PRODUCT',
+          access: { storefront: 'PUBLIC_READ' },
+        },
+      });
+      const { userErrors } = data.metafieldDefinitionCreate;
+      if (userErrors.length > 0) throw new Error(JSON.stringify(userErrors));
+      console.log(`DEF   quiz.${def.key} — created with storefront access`);
+    } catch (err) {
+      console.error(`DEF FAIL  quiz.${def.key} — ${err.message}`);
+    }
+  }
+}
+
 async function run() {
+  console.log('── Step 1: Ensuring metafield definitions ──');
+  await ensureDefinitions();
+  console.log('\n── Step 2: Assigning metafield values ──');
+
   let passed = 0;
   let failed = 0;
 

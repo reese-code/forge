@@ -4,8 +4,8 @@
     "theme_name": "Horizon",
     "theme_version": "1.0.1",
     "theme_author": "Shopify",
-    "theme_documentation_url": "https:\/\/help.shopify.com\/manual\/online-store\/themes",
-    "theme_support_url": "https:\/\/support.shopify.com\/"
+    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
+    "theme_support_url": "https://support.shopify.com/"
   },
   {
     "name": "t:names.logo_and_favicon",
@@ -2282,6 +2282,21 @@
           }
         ],
         "default": "equal-width-buttons"
+      }
+    ]
+  },
+  {
+    "name": "Integrations",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Skin Quiz"
+      },
+      {
+        "type": "text",
+        "id": "quiz_storefront_token",
+        "label": "Storefront API token",
+        "info": "Create a private app in Shopify admin with Storefront API access and paste the token here."
       }
     ]
   }
