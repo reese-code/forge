@@ -2,6 +2,7 @@
  * Collection Showcase
  *
  * Manages tab navigation, slide switching, and auto-rotation.
+ * Desktop: horizontal tab bar. Mobile: dropdown + progress bar.
  *
  * Autoplay uses setTimeout (not setInterval) so we can track elapsed time
  * and pause/resume the progress bar in place rather than resetting it.
@@ -136,8 +137,6 @@ class CollectionShowcase extends HTMLElement {
     if (userTriggered) {
       this._userInteracted = true;
 
-      // Stop any running timer and reset progress to 0 for the new slide, then
-      // hold it paused — the bar will start filling again on resume.
       clearTimeout(this._slideTimer ?? undefined);
       clearTimeout(this._resumeTimer ?? undefined);
       this._slideTimer  = null;
@@ -218,7 +217,7 @@ class CollectionShowcase extends HTMLElement {
     }
   }
 
-  /** Reset all progress fills back to 0 (used when the user manually picks a slide). */
+  /** Reset all progress fills back to 0. */
   _resetProgressToZero() {
     this.tabs.forEach((tab) => {
       const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));

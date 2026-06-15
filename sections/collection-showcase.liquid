@@ -7,6 +7,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background-color: #000;
     border-radius: var(--collection-slide-border-radius, 0px);
     clip-path: polygon(
       var(--collection-cutout-size, 0px) 0%,
@@ -89,11 +90,17 @@
     pointer-events: none;
   }
 
+  /* Desktop: inline layout (text left, button right) */
+  .collection-showcase[data-desktop-layout="inline"] .collection-showcase__slide-inner {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
   @media screen and (width < 750px) {
     .collection-showcase__slide-inner {
       padding: 1.5rem;
-      flex-direction: row;
-      align-items: flex-end;
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
@@ -101,28 +108,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-width: 60%;
-  }
-
-  @media screen and (width < 750px) {
-    .collection-showcase__slide-text {
-      max-width: 100%;
-      flex: 1;
-      min-width: 0;
-    }
-  }
-
-  /* ── Mobile layout: stacked override ── */
-  @media screen and (width < 750px) {
-    .collection-showcase[data-mobile-layout="stacked"] .collection-showcase__slide-inner {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .collection-showcase[data-mobile-layout="stacked"] .collection-showcase__slide-text {
-      flex: 0 0 auto;
-      width: 100%;
-    }
+    flex: 1;
+    min-width: 0;
   }
 
   .collection-showcase__slide-title {
@@ -253,38 +240,6 @@
     }
   }
 
-  /* ── Mobile Dropdown (centered, caret inline) ── */
-  .collection-showcase__dropdown-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dropdown-caret-gap, 8px);
-  }
-
-  .collection-showcase__dropdown {
-    width: auto;
-    padding: 0.5rem 0;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-    background: transparent;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    text-align: center;
-  }
-
-  .collection-showcase__dropdown-caret {
-    display: block;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid rgba(255, 255, 255, 0.8);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
-    transform: rotate(45deg) translateY(-2px);
-    flex-shrink: 0;
-    pointer-events: none;
-  }
-
   /* ── Mobile Progress Bar ── */
   .collection-showcase__mobile-progress {
     width: 100%;
@@ -311,6 +266,39 @@
 
   .collection-showcase__mobile-progress-fill.is-playing {
     animation: collection-showcase-progress var(--autoplay-duration, 5s) linear forwards;
+  }
+
+  /* ── Mobile Dropdown ── */
+  .collection-showcase__dropdown-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .collection-showcase__dropdown {
+    width: auto;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    background: transparent;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+  }
+
+  .collection-showcase__dropdown-caret {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid rgba(255, 255, 255, 0.8);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+    transform: rotate(45deg) translateY(-2px);
+    flex-shrink: 0;
+    pointer-events: none;
   }
 
   /* ── Slides wrapper — provides height so the container sizes correctly.
@@ -346,7 +334,7 @@
     spacing-style
   "
   data-autoplay="{{ section.settings.autoplay_speed }}"
-  data-mobile-layout="{{ section.settings.mobile_content_layout }}"
+  data-desktop-layout="{{ section.settings.desktop_content_layout }}"
   style="
     {% render 'spacing-style', settings: section.settings %}
     --tab-inactive-opacity: {{ section.settings.tab_inactive_opacity | divided_by: 100.0 }};
@@ -362,7 +350,6 @@
     --collection-cutout-size: {{ section.settings.cutout_size }}px;
     --collection-cutout-size-mobile: {{ section.settings.cutout_size_mobile }}px;
     --autoplay-duration: {{ section.settings.autoplay_speed }}s;
-    --dropdown-caret-gap: {{ section.settings.dropdown_caret_gap }}px;
     --nav-side-padding-mobile: {{ section.settings.nav_side_padding_mobile }}px;
     --nav-bottom-padding-mobile: {{ section.settings.nav_bottom_padding_mobile }}px;
     {% case section.settings.slide_height %}
@@ -505,11 +492,10 @@
             <div class="collection-showcase__mobile-progress-track"></div>
             <div class="collection-showcase__mobile-progress-fill"></div>
           </div>
-          <div class="collection-showcase__dropdown-wrapper">
+          <label for="CollectionShowcaseDropdown-{{ section.id }}" class="collection-showcase__dropdown-wrapper">
             <select
               id="CollectionShowcaseDropdown-{{ section.id }}"
               class="collection-showcase__dropdown"
-              aria-label="Select collection"
             >
               {% for block in section.blocks %}
                 {% assign collection = block.settings.collection %}
@@ -519,7 +505,7 @@
               {% endfor %}
             </select>
             <span class="collection-showcase__dropdown-caret" aria-hidden="true"></span>
-          </div>
+          </label>
         </div>
 
         {%- comment -%} Desktop tab bar — buttons only, no page navigation {%- endcomment -%}
@@ -750,27 +736,17 @@
     },
     {
       "type": "header",
-      "content": "Mobile layout"
+      "content": "Desktop layout"
     },
     {
       "type": "select",
-      "id": "mobile_content_layout",
+      "id": "desktop_content_layout",
       "label": "Content layout",
       "options": [
-        { "value": "inline", "label": "Inline — text left, button right" },
-        { "value": "stacked", "label": "Stacked — text and button in a column" }
+        { "value": "stacked", "label": "Stacked — text and button in a column" },
+        { "value": "inline", "label": "Inline — text left, button right" }
       ],
-      "default": "inline"
-    },
-    {
-      "type": "range",
-      "id": "dropdown_caret_gap",
-      "label": "Gap between dropdown text and caret",
-      "min": 0,
-      "max": 32,
-      "step": 1,
-      "unit": "px",
-      "default": 8
+      "default": "stacked"
     },
     {
       "type": "range",
@@ -937,8 +913,7 @@
         "nav_side_padding": 0,
         "nav_bottom_padding": 0,
         "section_width": "page-width",
-        "mobile_content_layout": "inline",
-        "dropdown_caret_gap": 8,
+        "desktop_content_layout": "stacked",
         "nav_side_padding_mobile": 0,
         "nav_bottom_padding_mobile": 0,
         "color_scheme": "scheme-1",
