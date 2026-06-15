@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "skin_quiz": {
@@ -7,7 +16,7 @@
         "quiz_headline": "Build Your Routine",
         "quiz_subheadline": "Answer 7 questions. Get your exact lineup.",
         "results_headline": "Your FORGE Routine",
-        "max_results": 6,
+        "max_results": 8,
         "show_atc": true,
         "q1_text": "What's your skin type?",
         "q1_opt1": "Dry",
@@ -52,5 +61,7 @@
       }
     }
   },
-  "order": ["skin_quiz"]
+  "order": [
+    "skin_quiz"
+  ]
 }
