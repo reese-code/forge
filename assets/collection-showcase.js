@@ -28,6 +28,9 @@ class CollectionShowcase extends HTMLElement {
     /** @type {HTMLSelectElement|null} Mobile dropdown */
     this.dropdown = null;
 
+    /** @type {HTMLElement|null} Mobile progress bar fill */
+    this.mobileProgressFill = null;
+
     /** @type {number|null} setInterval handle */
     this.timer = null;
 
@@ -42,6 +45,7 @@ class CollectionShowcase extends HTMLElement {
     this.slides = Array.from(this.querySelectorAll('.collection-showcase__slide'));
     this.tabs = Array.from(this.querySelectorAll('.collection-showcase__tab'));
     this.dropdown = this.querySelector('.collection-showcase__dropdown');
+    this.mobileProgressFill = this.querySelector('.collection-showcase__mobile-progress-fill');
 
     if (this.slides.length === 0) return;
 
@@ -129,9 +133,11 @@ class CollectionShowcase extends HTMLElement {
   _startAutoplay() {
     if (this.slides.length <= 1) return;
     this._stopAutoplay();
+    this._startProgressAnimation(this.currentIndex);
     this.timer = setInterval(() => {
       const next = (this.currentIndex + 1) % this.slides.length;
       this._goTo(next);
+      this._startProgressAnimation(next);
     }, this.autoplaySpeed);
   }
 
@@ -143,6 +149,37 @@ class CollectionShowcase extends HTMLElement {
     if (this._resumeTimer !== null) {
       clearTimeout(this._resumeTimer);
       this._resumeTimer = null;
+    }
+    this._stopProgressAnimation();
+  }
+
+  /** Restart the fill animation on the active tab bar and the mobile progress bar. */
+  _startProgressAnimation(/** @type {number} */ _index) {
+    // Desktop tab fills — force a reflow to restart the CSS animation on the active tab.
+    this.tabs.forEach((tab) => {
+      const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));
+      if (!fill) return;
+      fill.style.animation = 'none';
+      void fill.offsetWidth;
+      fill.style.animation = '';
+    });
+
+    // Mobile progress bar — use is-playing class so CSS controls the animation declaration.
+    if (this.mobileProgressFill) {
+      this.mobileProgressFill.classList.remove('is-playing');
+      void this.mobileProgressFill.offsetWidth;
+      this.mobileProgressFill.classList.add('is-playing');
+    }
+  }
+
+  /** Clear all progress animations. */
+  _stopProgressAnimation() {
+    this.tabs.forEach((tab) => {
+      const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));
+      if (fill) fill.style.animation = 'none';
+    });
+    if (this.mobileProgressFill) {
+      this.mobileProgressFill.classList.remove('is-playing');
     }
   }
 }

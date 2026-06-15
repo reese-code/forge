@@ -20,6 +20,21 @@
     );
   }
 
+  @media screen and (width < 750px) {
+    .collection-showcase__slides-container {
+      clip-path: polygon(
+        var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px)) 0%,
+        calc(100% - var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px))) 0%,
+        100% var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px)),
+        100% calc(100% - var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px))),
+        calc(100% - var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px))) 100%,
+        var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px)) 100%,
+        0% calc(100% - var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px))),
+        0% var(--collection-cutout-size-mobile, var(--collection-cutout-size, 0px))
+      );
+    }
+  }
+
   /* ── Individual Slide ── */
   .collection-showcase__slide {
     display: flex;
@@ -172,16 +187,38 @@
     transition: color 0.3s ease;
   }
 
+  /* ── Tab progress bar (track + fill) ── */
   .collection-showcase__tab-bar {
     width: 100%;
     height: var(--tab-bar-height, 2px);
-    background: currentColor;
-    opacity: var(--tab-inactive-opacity, 0.3);
-    transition: opacity 0.4s ease;
+    position: relative;
+    overflow: hidden;
   }
 
-  .collection-showcase__tab.is-active .collection-showcase__tab-bar {
+  .collection-showcase__tab-bar-track {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: var(--tab-inactive-opacity, 0.3);
+  }
+
+  .collection-showcase__tab-bar-fill {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
     opacity: var(--tab-active-opacity, 1);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: none;
+  }
+
+  .collection-showcase__tab.is-active .collection-showcase__tab-bar-fill {
+    animation: collection-showcase-progress var(--autoplay-duration, 5s) linear forwards;
+  }
+
+  @keyframes collection-showcase-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
   }
 
   .collection-showcase__tab-label {
@@ -198,10 +235,16 @@
     opacity: 1;
   }
 
-  /* ── Mobile Dropdown ── */
+  /* ── Mobile Navigation ── */
   .collection-showcase__mobile-nav {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
+    padding-inline: var(--nav-side-padding-mobile, 0px);
+    padding-bottom: var(--nav-bottom-padding-mobile, 0px);
+    box-sizing: border-box;
+    gap: 0.5rem;
   }
 
   @media screen and (width >= 750px) {
@@ -210,34 +253,64 @@
     }
   }
 
+  /* ── Mobile Dropdown (centered, caret inline) ── */
   .collection-showcase__dropdown-wrapper {
-    position: relative;
-    width: 100%;
-  }
-
-  .collection-showcase__dropdown-wrapper::after {
-    content: '';
-    position: absolute;
-    right: 1.125rem;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid rgba(255, 255, 255, 0.8);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
-    transform: translateY(-65%) rotate(45deg);
-    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dropdown-caret-gap, 8px);
   }
 
   .collection-showcase__dropdown {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    width: auto;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
     background: transparent;
     color: #fff;
     font-size: 1rem;
     cursor: pointer;
     appearance: none;
+    -webkit-appearance: none;
     text-align: center;
+  }
+
+  .collection-showcase__dropdown-caret {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid rgba(255, 255, 255, 0.8);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+    transform: rotate(45deg) translateY(-2px);
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  /* ── Mobile Progress Bar ── */
+  .collection-showcase__mobile-progress {
+    width: 100%;
+    height: var(--tab-bar-height, 2px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .collection-showcase__mobile-progress-track {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: var(--tab-inactive-opacity, 0.3);
+  }
+
+  .collection-showcase__mobile-progress-fill {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: var(--tab-active-opacity, 1);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .collection-showcase__mobile-progress-fill.is-playing {
+    animation: collection-showcase-progress var(--autoplay-duration, 5s) linear forwards;
   }
 
   /* ── Slides wrapper — provides height so the container sizes correctly.
@@ -247,6 +320,12 @@
   .collection-showcase__slides-wrapper {
     min-height: var(--collection-slide-height);
     flex: 1;
+  }
+
+  @media screen and (width < 750px) {
+    .collection-showcase__slides-wrapper {
+      min-height: var(--collection-slide-height-mobile, var(--collection-slide-height));
+    }
   }
 {% endstylesheet %}
 
@@ -281,6 +360,11 @@
     --content-gap: {{ section.settings.content_gap }}px;
     --collection-slide-border-radius: {{ section.settings.slide_border_radius }}px;
     --collection-cutout-size: {{ section.settings.cutout_size }}px;
+    --collection-cutout-size-mobile: {{ section.settings.cutout_size_mobile }}px;
+    --autoplay-duration: {{ section.settings.autoplay_speed }}s;
+    --dropdown-caret-gap: {{ section.settings.dropdown_caret_gap }}px;
+    --nav-side-padding-mobile: {{ section.settings.nav_side_padding_mobile }}px;
+    --nav-bottom-padding-mobile: {{ section.settings.nav_bottom_padding_mobile }}px;
     {% case section.settings.slide_height %}
       {% when 'small' %}
         --collection-slide-height: var(--section-height-small);
@@ -290,6 +374,16 @@
         --collection-slide-height: var(--section-height-large);
       {% when 'custom' %}
         --collection-slide-height: {{ section.settings.slide_height_custom }}svh;
+    {% endcase %}
+    {% case section.settings.slide_height_mobile %}
+      {% when 'small' %}
+        --collection-slide-height-mobile: var(--section-height-small);
+      {% when 'medium' %}
+        --collection-slide-height-mobile: var(--section-height-medium);
+      {% when 'large' %}
+        --collection-slide-height-mobile: var(--section-height-large);
+      {% when 'custom' %}
+        --collection-slide-height-mobile: {{ section.settings.slide_height_custom_mobile }}svh;
     {% endcase %}
   "
 >
@@ -405,11 +499,12 @@
     {% if has_blocks %}
       <div class="collection-showcase__nav-wrapper">
 
-        {%- comment -%} Mobile dropdown {%- endcomment -%}
+        {%- comment -%} Mobile dropdown + progress bar {%- endcomment -%}
         <div class="collection-showcase__mobile-nav">
-          <label class="visually-hidden" for="CollectionShowcaseDropdown-{{ section.id }}">
-            Select collection
-          </label>
+          <div class="collection-showcase__mobile-progress" aria-hidden="true">
+            <div class="collection-showcase__mobile-progress-track"></div>
+            <div class="collection-showcase__mobile-progress-fill"></div>
+          </div>
           <div class="collection-showcase__dropdown-wrapper">
             <select
               id="CollectionShowcaseDropdown-{{ section.id }}"
@@ -423,6 +518,7 @@
                 </option>
               {% endfor %}
             </select>
+            <span class="collection-showcase__dropdown-caret" aria-hidden="true"></span>
           </div>
         </div>
 
@@ -438,7 +534,10 @@
               aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
               aria-label="{{ collection.title | default: 'Collection' }}"
             >
-              <div class="collection-showcase__tab-bar" aria-hidden="true"></div>
+              <div class="collection-showcase__tab-bar" aria-hidden="true">
+                <div class="collection-showcase__tab-bar-track"></div>
+                <div class="collection-showcase__tab-bar-fill"></div>
+              </div>
               <span class="collection-showcase__tab-label">
                 {{- collection.title | default: 'Collection' -}}
               </span>
@@ -552,7 +651,7 @@
     {
       "type": "select",
       "id": "slide_height",
-      "label": "Slide height",
+      "label": "Desktop height",
       "options": [
         { "value": "small", "label": "Small" },
         { "value": "medium", "label": "Medium" },
@@ -564,13 +663,37 @@
     {
       "type": "range",
       "id": "slide_height_custom",
-      "label": "Custom height",
+      "label": "Custom desktop height",
       "min": 20,
       "max": 100,
       "step": 1,
       "unit": "%",
       "default": 60,
       "visible_if": "{{ section.settings.slide_height == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "slide_height_mobile",
+      "label": "Mobile height",
+      "options": [
+        { "value": "same", "label": "Same as desktop" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "custom", "label": "Custom" }
+      ],
+      "default": "same"
+    },
+    {
+      "type": "range",
+      "id": "slide_height_custom_mobile",
+      "label": "Custom mobile height",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 60,
+      "visible_if": "{{ section.settings.slide_height_mobile == 'custom' }}"
     },
     {
       "type": "range",
@@ -585,8 +708,19 @@
     {
       "type": "range",
       "id": "cutout_size",
-      "label": "Corner cutout size",
+      "label": "Corner cutout size (desktop)",
       "info": "Creates diagonal cut corners on the slide image",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cutout_size_mobile",
+      "label": "Corner cutout size (mobile)",
+      "info": "Overrides the cutout size on mobile",
       "min": 0,
       "max": 60,
       "step": 2,
@@ -627,6 +761,37 @@
         { "value": "stacked", "label": "Stacked — text and button in a column" }
       ],
       "default": "inline"
+    },
+    {
+      "type": "range",
+      "id": "dropdown_caret_gap",
+      "label": "Gap between dropdown text and caret",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "nav_side_padding_mobile",
+      "label": "Progress bar side padding (mobile)",
+      "info": "Left and right padding for the mobile progress bar — match to your content padding",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "nav_bottom_padding_mobile",
+      "label": "Nav bottom padding (mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0
     },
     {
       "type": "header",
@@ -758,8 +923,10 @@
       "category": "Collections",
       "settings": {
         "slide_height": "medium",
+        "slide_height_mobile": "same",
         "slide_border_radius": 4,
         "cutout_size": 16,
+        "cutout_size_mobile": 16,
         "content_bottom_offset": 64,
         "content_gap": 16,
         "autoplay_speed": 5,
@@ -771,12 +938,15 @@
         "nav_bottom_padding": 0,
         "section_width": "page-width",
         "mobile_content_layout": "inline",
+        "dropdown_caret_gap": 8,
+        "nav_side_padding_mobile": 0,
+        "nav_bottom_padding_mobile": 0,
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 0
       },
-      "blocks": {
-        "collection_1": {
+      "blocks": [
+        {
           "type": "collection",
           "settings": {
             "slide_title": "",
@@ -787,7 +957,7 @@
             "gradient_direction": "to top"
           }
         },
-        "collection_2": {
+        {
           "type": "collection",
           "settings": {
             "slide_title": "",
@@ -798,7 +968,7 @@
             "gradient_direction": "to top"
           }
         },
-        "collection_3": {
+        {
           "type": "collection",
           "settings": {
             "slide_title": "",
@@ -809,8 +979,7 @@
             "gradient_direction": "to top"
           }
         }
-      },
-      "block_order": ["collection_1", "collection_2", "collection_3"]
+      ]
     }
   ]
 }
