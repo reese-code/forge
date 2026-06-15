@@ -284,13 +284,28 @@
     }
   }
 
+  async function getCartCount() {
+    try {
+      const r = await fetch('/cart.js');
+      const data = await r.json();
+      return data.item_count ?? 0;
+    } catch { return 0; }
+  }
+
+  function dispatchCartUpdate(itemCount) {
+    const ev = new Event('cart:update', { bubbles: true });
+    ev.detail = { resource: {}, sourceId: 'quiz-atc', data: { itemCount } };
+    document.dispatchEvent(ev);
+  }
+
   async function addToCart(variantId) {
     await fetch('/cart/add.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: variantId, quantity: 1 }),
     });
-    document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+    const count = await getCartCount();
+    dispatchCartUpdate(count);
   }
 
   function renderResults(products) {
@@ -313,33 +328,34 @@
       const url = p.url || '/products/' + p.handle;
 
       const img = p.featuredImage?.url
-        ? `<img src="${p.featuredImage.url}" alt="${(p.featuredImage.altText || p.title).replace(/"/g, '&quot;')}" loading="lazy" class="quiz-product-row__image">`
-        : `<div class="quiz-product-row__image" style="background:var(--color-border,#eee)"></div>`;
+        ? `<img src="${p.featuredImage.url}" alt="${(p.featuredImage.altText || p.title).replace(/"/g, '&quot;')}" loading="lazy" class="quiz-product-card__image">`
+        : `<div class="quiz-product-card__image quiz-product-card__image--placeholder"></div>`;
 
       const compareHtml = comparePrice && parseFloat(comparePrice.amount) > parseFloat(price?.amount || 0)
-        ? `<span class="quiz-product-row__price--compare">${formatMoney(comparePrice.amount, comparePrice.currencyCode)}</span>`
+        ? `<span class="quiz-product-card__price--compare">${formatMoney(comparePrice.amount, comparePrice.currencyCode)}</span>`
         : '';
 
       const atcHtml = SHOW_ATC && available && variantId
-        ? `<button class="button quiz-product-row__atc-btn" data-variant-id="${variantId}">Add to Cart</button>`
-        : '';
+        ? `<button class="button quiz-product-card__atc-btn" data-variant-id="${variantId}">Add to Cart</button>`
+        : (!available ? `<button class="button quiz-product-card__atc-btn" disabled>Sold Out</button>` : '');
 
       return `
-        <div class="quiz-product-row">
-          <a href="${url}" class="quiz-product-row__image-link">${img}</a>
-          <div class="quiz-product-row__info">
-            <a href="${url}" class="quiz-product-row__title">${p.title}</a>
-            <p class="quiz-product-row__price">
+        <div class="quiz-product-card">
+          <a href="${url}" class="quiz-product-card__image-link">${img}</a>
+          <div class="quiz-product-card__info">
+            <a href="${url}" class="quiz-product-card__title">${p.title}</a>
+            <p class="quiz-product-card__price">
               ${compareHtml}
               <span>${price ? formatMoney(price.amount, price.currencyCode) : ''}</span>
             </p>
           </div>
-          ${atcHtml ? `<div class="quiz-product-row__actions">${atcHtml}</div>` : ''}
+          ${atcHtml ? `<div class="quiz-product-card__actions">${atcHtml}</div>` : ''}
         </div>`;
     }).join('');
 
-    // Per-row ATC buttons
-    productList.querySelectorAll('.quiz-product-row__atc-btn').forEach(btn => {
+    // Per-card ATC buttons
+    productList.querySelectorAll('.quiz-product-card__atc-btn').forEach(btn => {
+      if (btn.disabled) return;
       btn.addEventListener('click', async () => {
         const varId = btn.dataset.variantId;
         btn.disabled = true;
@@ -349,8 +365,14 @@
           btn.textContent = 'Added!';
         } catch {
           btn.textContent = 'Error';
+          btn.disabled = false;
         } finally {
-          setTimeout(() => { btn.textContent = 'Add to Cart'; btn.disabled = false; }, 2000);
+          setTimeout(() => {
+            if (btn.textContent !== 'Error') {
+              btn.textContent = 'Add to Cart';
+              btn.disabled = false;
+            }
+          }, 2000);
         }
       });
     });
@@ -371,10 +393,10 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items }),
           });
-          document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+          const count = await getCartCount();
+          dispatchCartUpdate(count);
           addAllBtn.textContent = 'Added!';
-          // Update all row buttons
-          productList.querySelectorAll('.quiz-product-row__atc-btn').forEach(b => {
+          productList.querySelectorAll('.quiz-product-card__atc-btn').forEach(b => {
             b.textContent = 'Added!';
           });
         } catch {

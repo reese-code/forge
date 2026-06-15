@@ -211,6 +211,21 @@
   style="{% render 'size-style', settings: block.settings %}{% render 'spacing-style', settings: block.settings %}"
   {{ block.shopify_attributes }}
 >
+  {%- if block.settings.button_corner_style == 'cutout' -%}
+    {%- assign bcs = block.settings.button_cutout_size -%}
+    {%- case block.settings.button_cutout_corners -%}
+      {%- when 'all' -%}
+        {%- capture email_btn_clip -%}polygon({{ bcs }}px 0%, calc(100% - {{ bcs }}px) 0%, 100% {{ bcs }}px, 100% calc(100% - {{ bcs }}px), calc(100% - {{ bcs }}px) 100%, {{ bcs }}px 100%, 0% calc(100% - {{ bcs }}px), 0% {{ bcs }}px){%- endcapture -%}
+      {%- when 'top-left' -%}
+        {%- capture email_btn_clip -%}polygon({{ bcs }}px 0%, 100% 0%, 100% 100%, 0% 100%, 0% {{ bcs }}px){%- endcapture -%}
+      {%- when 'top-right' -%}
+        {%- capture email_btn_clip -%}polygon(0% 0%, calc(100% - {{ bcs }}px) 0%, 100% {{ bcs }}px, 100% 100%, 0% 100%){%- endcapture -%}
+      {%- when 'bottom-right' -%}
+        {%- capture email_btn_clip -%}polygon(0% 0%, 100% 0%, 100% calc(100% - {{ bcs }}px), calc(100% - {{ bcs }}px) 100%, 0% 100%){%- endcapture -%}
+      {%- when 'bottom-left' -%}
+        {%- capture email_btn_clip -%}polygon(0% 0%, 100% 0%, 100% 100%, {{ bcs }}px 100%, 0% calc(100% - {{ bcs }}px)){%- endcapture -%}
+    {%- endcase -%}
+  {%- endif -%}
   {%- form 'customer', class: 'email-signup__form spacing-style' %}
     {%- if block.settings.title != blank -%}
       <{{ block.settings.title_size }} class="email-signup__title {{ block.settings.title_size }}">{{ block.settings.title }}</{{ block.settings.title_size }}>
@@ -252,6 +267,7 @@
       >
       <button
         class="email-signup__button {% if block.settings.integrated_button or block.settings.border_style == 'underline' %}email-signup__button--integrated{% endif %} email-signup__button--{{ block.settings.display_type }} {{ block.settings.button_type_preset }} {{ block.settings.style_class }} {{ block.settings.style_class }}--{{ block.id }} {% if block.settings.inherit_color_scheme == false %}color-{{ block.settings.color_scheme }}{% endif %}"
+        {% if email_btn_clip %}style="clip-path: {{ email_btn_clip }}; border-radius: 0;"{% endif %}
         {% if block.settings.display_type != 'text' %}
           aria-label="{{ 'actions.sign_up' | t }}"
         {% endif %}
@@ -617,6 +633,45 @@
       "default": "paragraph",
       "info": "t:info.edit_presets_in_theme_settings",
       "visible_if": "{{ block.settings.display_type == \"text\" }}"
+    },
+    {
+      "type": "header",
+      "content": "Button corner style"
+    },
+    {
+      "type": "select",
+      "id": "button_corner_style",
+      "label": "Corner style",
+      "options": [
+        { "value": "default", "label": "Default (theme setting)" },
+        { "value": "cutout", "label": "Cutout (diagonal)" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "select",
+      "id": "button_cutout_corners",
+      "label": "Cutout corners",
+      "options": [
+        { "value": "all", "label": "All corners" },
+        { "value": "top-left", "label": "Top left only" },
+        { "value": "top-right", "label": "Top right only" },
+        { "value": "bottom-left", "label": "Bottom left only" },
+        { "value": "bottom-right", "label": "Bottom right only" }
+      ],
+      "default": "all",
+      "visible_if": "{{ block.settings.button_corner_style == 'cutout' }}"
+    },
+    {
+      "type": "range",
+      "id": "button_cutout_size",
+      "label": "Cutout size",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+      "visible_if": "{{ block.settings.button_corner_style == 'cutout' }}"
     },
     {
       "type": "header",

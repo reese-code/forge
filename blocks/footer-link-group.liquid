@@ -1,0 +1,207 @@
+
+{% stylesheet %}
+  .footer-link-group__details {
+    width: 100%;
+  }
+
+  @media screen and (width >= 750px) {
+    .footer-link-group__details {
+      width: fit-content;
+    }
+  }
+
+  .footer-link-group__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: default;
+    gap: var(--spacing-sm);
+  }
+
+  .footer-link-group__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .footer-link-group__toggle {
+    display: none;
+  }
+
+  .footer-link-group__links {
+    margin-block-start: var(--footer-link-group-gap, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--footer-link-group-gap, 12px);
+  }
+
+  .footer-link-group__links a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .footer-link-group__links a:hover {
+    opacity: 0.75;
+  }
+
+  @media screen and (width < 750px) {
+    .footer-link-group__details {
+      border-block-end: 1px solid var(--color-border);
+    }
+
+    .footer-link-group__summary {
+      cursor: pointer;
+      padding-block: var(--spacing-md, 14px);
+    }
+
+    .footer-link-group__toggle {
+      display: flex;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .footer-link-group__details[open] .footer-link-group__toggle {
+      transform: rotate(180deg);
+    }
+
+    .footer-link-group__links {
+      padding-block-end: var(--spacing-md, 14px);
+    }
+
+    /* Prevent details/summary native triangle on mobile */
+    .footer-link-group__details > summary {
+      list-style: none;
+    }
+  }
+{% endstylesheet %}
+
+{% liquid
+  assign heading = block.settings.heading
+  assign menu = block.settings.menu
+%}
+
+<details
+  class="footer-link-group__details spacing-style"
+  style="
+    --footer-link-group-gap: {{ block.settings.link_gap }}px;
+    {% render 'spacing-style', settings: block.settings %}
+  "
+  open
+  {{ block.shopify_attributes }}
+>
+  <summary class="footer-link-group__summary {{ block.settings.heading_size }}">
+    {% if heading != blank %}
+      <span>{{ heading }}</span>
+    {% elsif menu != blank %}
+      <span>{{ menu.title }}</span>
+    {% endif %}
+    <span class="footer-link-group__toggle svg-wrapper">
+      {{- 'icon-caret.svg' | inline_asset_content -}}
+    </span>
+  </summary>
+
+  <div class="footer-link-group__links">
+    {% if menu != blank %}
+      {% for link in menu.links %}
+        <a href="{{ link.url }}" class="{{ block.settings.link_size }}">
+          {{ link.title }}
+        </a>
+      {% endfor %}
+    {% endif %}
+  </div>
+</details>
+
+{% schema %}
+{
+  "name": "Footer Link Group",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Overrides the navigation menu title if set."
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation menu",
+      "info": "Manage links via Online Store > Navigation."
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h6", "label": "H6 (smallest)" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h1", "label": "H1 (largest)" }
+      ],
+      "default": "h5"
+    },
+    {
+      "type": "select",
+      "id": "link_size",
+      "label": "Link text size",
+      "options": [
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h6", "label": "H6 (smallest)" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h1", "label": "H1 (largest)" }
+      ],
+      "default": "paragraph"
+    },
+    {
+      "type": "range",
+      "id": "link_gap",
+      "label": "Gap between links",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer Link Group",
+      "category": "Footer"
+    }
+  ]
+}
+{% endschema %}

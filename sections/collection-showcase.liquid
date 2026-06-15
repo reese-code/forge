@@ -440,9 +440,25 @@
               </div>
 
               {%- if block.settings.button_label != blank -%}
+                {%- if block.settings.button_corner_style == 'cutout' -%}
+                  {%- assign bcs = block.settings.button_cutout_size -%}
+                  {%- case block.settings.button_cutout_corners -%}
+                    {%- when 'all' -%}
+                      {%- capture btn_clip -%}polygon({{ bcs }}px 0%, calc(100% - {{ bcs }}px) 0%, 100% {{ bcs }}px, 100% calc(100% - {{ bcs }}px), calc(100% - {{ bcs }}px) 100%, {{ bcs }}px 100%, 0% calc(100% - {{ bcs }}px), 0% {{ bcs }}px){%- endcapture -%}
+                    {%- when 'top-left' -%}
+                      {%- capture btn_clip -%}polygon({{ bcs }}px 0%, 100% 0%, 100% 100%, 0% 100%, 0% {{ bcs }}px){%- endcapture -%}
+                    {%- when 'top-right' -%}
+                      {%- capture btn_clip -%}polygon(0% 0%, calc(100% - {{ bcs }}px) 0%, 100% {{ bcs }}px, 100% 100%, 0% 100%){%- endcapture -%}
+                    {%- when 'bottom-right' -%}
+                      {%- capture btn_clip -%}polygon(0% 0%, 100% 0%, 100% calc(100% - {{ bcs }}px), calc(100% - {{ bcs }}px) 100%, 0% 100%){%- endcapture -%}
+                    {%- when 'bottom-left' -%}
+                      {%- capture btn_clip -%}polygon(0% 0%, 100% 0%, 100% 100%, {{ bcs }}px 100%, 0% calc(100% - {{ bcs }}px)){%- endcapture -%}
+                  {%- endcase -%}
+                {%- endif -%}
                 <a
                   href="{{ block.settings.button_link | default: collection.url | default: '#' }}"
                   class="button collection-showcase__slide-button"
+                  {% if btn_clip %}style="clip-path: {{ btn_clip }}; border-radius: 0;"{% endif %}
                 >
                   {{- block.settings.button_label -}}
                 </a>
@@ -582,6 +598,45 @@
           "id": "button_link",
           "label": "Button link",
           "info": "Defaults to collection URL if blank"
+        },
+        {
+          "type": "header",
+          "content": "Button corner style"
+        },
+        {
+          "type": "select",
+          "id": "button_corner_style",
+          "label": "Corner style",
+          "options": [
+            { "value": "default", "label": "Default (theme setting)" },
+            { "value": "cutout", "label": "Cutout (diagonal)" }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "select",
+          "id": "button_cutout_corners",
+          "label": "Cutout corners",
+          "options": [
+            { "value": "all", "label": "All corners" },
+            { "value": "top-left", "label": "Top left only" },
+            { "value": "top-right", "label": "Top right only" },
+            { "value": "bottom-left", "label": "Bottom left only" },
+            { "value": "bottom-right", "label": "Bottom right only" }
+          ],
+          "default": "all",
+          "visible_if": "{{ block.settings.button_corner_style == 'cutout' }}"
+        },
+        {
+          "type": "range",
+          "id": "button_cutout_size",
+          "label": "Cutout size",
+          "min": 2,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 10,
+          "visible_if": "{{ block.settings.button_corner_style == 'cutout' }}"
         },
         {
           "type": "header",

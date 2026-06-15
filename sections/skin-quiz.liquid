@@ -8,6 +8,12 @@
     padding: var(--spacing-lg, 40px) var(--spacing-md, 20px);
   }
 
+  .quiz-results {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   /* ── Header ── */
   .quiz-header {
     text-align: center;
@@ -166,6 +172,9 @@
   .quiz-results {
     display: none;
     animation: quiz-fade-in 0.3s ease forwards;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .quiz-results.is-active {
@@ -213,64 +222,60 @@
     color: var(--color-foreground-heading, var(--color-foreground));
   }
 
-  /* ── Product list ── */
+  /* ── Product grid ── */
   .quiz-product-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .quiz-product-card {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 10px;
   }
 
-  .quiz-product-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--color-border, #e6e6e6);
-  }
-
-  .quiz-product-row:first-child {
-    border-top: 1px solid var(--color-border, #e6e6e6);
-  }
-
-  .quiz-product-row__image-link {
-    flex-shrink: 0;
+  .quiz-product-card__image-link {
     display: block;
-    width: 80px;
-    height: 80px;
-    border-radius: var(--style-border-radius-sm, 6px);
+    aspect-ratio: 1 / 1;
     overflow: hidden;
+    border-radius: var(--style-border-radius-sm, 6px);
   }
 
-  .quiz-product-row__image {
+  .quiz-product-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .quiz-product-row__info {
-    flex: 1;
-    min-width: 0;
+  .quiz-product-card__image--placeholder {
+    background: var(--color-border, #eee);
+  }
+
+  .quiz-product-card__info {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
   }
 
-  .quiz-product-row__title {
-    font-size: 0.9375rem;
+  .quiz-product-card__title {
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--color-foreground-heading, var(--color-foreground));
     text-decoration: none;
     line-height: 1.3;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
-  .quiz-product-row__title:hover { text-decoration: underline; }
+  .quiz-product-card__title:hover { text-decoration: underline; }
 
-  .quiz-product-row__price {
-    font-size: 0.875rem;
+  .quiz-product-card__price {
+    font-size: 0.8125rem;
     margin: 0;
     display: flex;
     gap: 6px;
@@ -278,19 +283,19 @@
     color: var(--color-foreground);
   }
 
-  .quiz-product-row__price--compare {
+  .quiz-product-card__price--compare {
     text-decoration: line-through;
     opacity: 0.45;
   }
 
-  .quiz-product-row__actions {
-    flex-shrink: 0;
+  .quiz-product-card__actions {
+    margin-top: auto;
   }
 
-  .quiz-product-row__atc-btn {
-    padding: 10px 20px;
-    font-size: 0.875rem;
-    white-space: nowrap;
+  .quiz-product-card__atc-btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.8125rem;
   }
 
   /* ── Restart ── */
@@ -313,7 +318,7 @@
     border-color: var(--color-foreground);
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 749px) {
     .quiz-options {
       grid-template-columns: 1fr 1fr;
     }
@@ -323,9 +328,9 @@
       align-items: flex-start;
     }
 
-    .quiz-product-row__atc-btn {
-      padding: 8px 14px;
-      font-size: 0.8125rem;
+    .quiz-product-list {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
     }
   }
 {% endstylesheet %}

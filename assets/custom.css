@@ -387,6 +387,22 @@ p:not(.custom-font-size):not(.custom-font-size *) {
 
 
 /* =============================================
+ * 3b. CART BUBBLE FIX
+ * ============================================= */
+
+/* Always force white text on the cart bubble regardless of header scroll state or color scheme */
+.header-actions__cart-icon .cart-bubble,
+.header-actions__cart-icon .cart-bubble__text,
+.cart-drawer__heading .cart-bubble__text {
+  color: #fff !important;
+}
+
+.header-actions__cart-icon .cart-bubble__background,
+.cart-drawer__heading .cart-bubble__background {
+  background-color: #171717 !important;
+}
+
+/* =============================================
  * 4. LAYOUT UTILITIES
  * ============================================= */
 /* Margin utilities */
