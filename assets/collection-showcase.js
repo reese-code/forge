@@ -1,185 +1,249 @@
 /**
  * Collection Showcase
  *
- * Manages tab navigation, slide switching, and auto-rotation
- * for the Collection Showcase section.
+ * Manages tab navigation, slide switching, and auto-rotation.
  *
- * Tabs are <button> elements — they switch the active slide only,
- * no page navigation. Clicking the image or the "Shop collection"
- * button navigates to the collection.
+ * Autoplay uses setTimeout (not setInterval) so we can track elapsed time
+ * and pause/resume the progress bar in place rather than resetting it.
+ *
+ * Pause sources:
+ *   - Hover  → pauses, resumes on mouse-leave (unless user clicked a tab)
+ *   - Tab / dropdown click → pauses and locks; resumes after 10 s of
+ *     inactivity OR when the user clicks outside the component
  */
 
 class CollectionShowcase extends HTMLElement {
   constructor() {
     super();
 
-    /** @type {number} Auto-rotate interval in milliseconds */
+    /** @type {number} Auto-rotate duration in milliseconds */
     this.autoplaySpeed = (parseInt(this.dataset.autoplay ?? '5', 10) || 5) * 1000;
 
     /** @type {number} Currently active slide index */
     this.currentIndex = 0;
 
-    /** @type {HTMLElement[]} Slide elements */
+    /** @type {HTMLElement[]} */
     this.slides = [];
 
-    /** @type {HTMLElement[]} Desktop tab button elements */
+    /** @type {HTMLElement[]} Desktop tab buttons */
     this.tabs = [];
 
-    /** @type {HTMLSelectElement|null} Mobile dropdown */
+    /** @type {HTMLSelectElement|null} */
     this.dropdown = null;
 
-    /** @type {HTMLElement|null} Mobile progress bar fill */
+    /** @type {HTMLElement|null} */
     this.mobileProgressFill = null;
 
-    /** @type {number|null} setInterval handle */
-    this.timer = null;
+    // ── Timer state ─────────────────────────────────────────────────────────
 
-    /** @type {number|null} setTimeout handle for auto-resume */
+    /** @type {number|null} setTimeout handle for the next slide advance */
+    this._slideTimer = null;
+
+    /** @type {number|null} setTimeout handle for auto-resume after user click */
     this._resumeTimer = null;
 
-    /** @type {boolean} Whether the user has manually interacted */
-    this.userInteracted = false;
+    /** @type {number} Timestamp when the current slide timer was last started/resumed */
+    this._slideStartTime = 0;
+
+    /** @type {number} Milliseconds already elapsed when paused */
+    this._elapsed = 0;
+
+    /** @type {boolean} Whether the slide timer is currently paused */
+    this._paused = false;
+
+    /** @type {boolean} Whether the user has manually clicked a tab/dropdown */
+    this._userInteracted = false;
+
+    /** @type {((e: MouseEvent) => void)|null} Bound document click handler */
+    this._onDocumentClick = null;
   }
 
   connectedCallback() {
     this.slides = Array.from(this.querySelectorAll('.collection-showcase__slide'));
-    this.tabs = Array.from(this.querySelectorAll('.collection-showcase__tab'));
-    this.dropdown = this.querySelector('.collection-showcase__dropdown');
+    this.tabs   = Array.from(this.querySelectorAll('.collection-showcase__tab'));
+    this.dropdown          = this.querySelector('.collection-showcase__dropdown');
     this.mobileProgressFill = this.querySelector('.collection-showcase__mobile-progress-fill');
 
     if (this.slides.length === 0) return;
 
     this._bindEvents();
-    this._startAutoplay();
+    this._startSlideTimer();
   }
 
   disconnectedCallback() {
-    this._stopAutoplay();
+    clearTimeout(this._slideTimer ?? undefined);
+    clearTimeout(this._resumeTimer ?? undefined);
+    if (this._onDocumentClick) {
+      document.removeEventListener('click', this._onDocumentClick);
+    }
   }
 
-  // ── Private Methods ──────────────────────────────────────────────────────
+  // ── Events ───────────────────────────────────────────────────────────────
 
   _bindEvents() {
-    // Tab click handlers — always just switch the slide, never navigate
     this.tabs.forEach((tab) => {
       tab.addEventListener('click', () => {
-        const index = parseInt(tab.dataset.index ?? '0', 10);
-        this._goTo(index, true);
+        this._goTo(parseInt(tab.dataset.index ?? '0', 10), true);
       });
     });
 
-    // Mobile dropdown
-    const dropdown = this.dropdown;
-    if (dropdown) {
-      dropdown.addEventListener('change', () => {
-        this._goTo(parseInt(dropdown.value, 10), true);
+    if (this.dropdown) {
+      this.dropdown.addEventListener('change', () => {
+        this._goTo(parseInt(/** @type {HTMLSelectElement} */ (this.dropdown).value, 10), true);
       });
     }
 
-    // Pause on hover / focus
-    this.addEventListener('mouseenter', () => this._stopAutoplay());
+    // Hover → pause in place; leave → resume (unless locked by a click)
+    this.addEventListener('mouseenter', () => this._pause());
     this.addEventListener('mouseleave', () => {
-      if (!this.userInteracted) this._startAutoplay();
+      if (!this._userInteracted) this._resume();
     });
 
-    this.addEventListener('focusin', () => this._stopAutoplay());
-    this.addEventListener('focusout', () => {
-      if (!this.userInteracted && !this.matches(':hover')) this._startAutoplay();
-    });
+    // Click outside → unlock and resume
+    this._onDocumentClick = (/** @type {MouseEvent} */ e) => {
+      if (this.contains(/** @type {Node} */ (e.target))) return;
+      this._userInteracted = false;
+      clearTimeout(this._resumeTimer ?? undefined);
+      this._resumeTimer = null;
+      if (!this.matches(':hover')) this._resume();
+    };
+    document.addEventListener('click', this._onDocumentClick);
   }
 
+  // ── Navigation ───────────────────────────────────────────────────────────
+
   /**
-   * Navigate to a specific slide index.
-   * @param {number} index - Target slide index
-   * @param {boolean} [userTriggered=false] - Whether user initiated the change
+   * @param {number}  index
+   * @param {boolean} [userTriggered=false]
    */
   _goTo(index, userTriggered = false) {
     const total = this.slides.length;
     if (total === 0) return;
 
-    // Normalise index (wrap around)
     index = ((index % total) + total) % total;
 
-    // Update slides
-    this.slides.forEach((slide, i) => {
-      slide.classList.toggle('is-active', i === index);
-    });
+    this.slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
 
-    // Update desktop tabs
     this.tabs.forEach((tab, i) => {
-      const active = i === index;
-      tab.classList.toggle('is-active', active);
-      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.classList.toggle('is-active', i === index);
+      tab.setAttribute('aria-selected', i === index ? 'true' : 'false');
     });
 
-    // Update mobile dropdown
-    if (this.dropdown != null) {
-      this.dropdown.value = String(index);
-    }
+    if (this.dropdown) this.dropdown.value = String(index);
 
     this.currentIndex = index;
 
     if (userTriggered) {
-      this.userInteracted = true;
-      this._stopAutoplay();
-      // Resume auto-rotate after 10 seconds of inactivity
+      this._userInteracted = true;
+
+      // Stop any running timer and reset progress to 0 for the new slide, then
+      // hold it paused — the bar will start filling again on resume.
+      clearTimeout(this._slideTimer ?? undefined);
+      clearTimeout(this._resumeTimer ?? undefined);
+      this._slideTimer  = null;
+      this._resumeTimer = null;
+      this._paused      = true;
+      this._elapsed     = 0;
+      this._slideStartTime = 0;
+      this._resetProgressToZero();
+
+      // Auto-resume after 10 s of no further interaction
       this._resumeTimer = setTimeout(() => {
-        this.userInteracted = false;
-        this._startAutoplay();
+        this._userInteracted = false;
+        if (!this.matches(':hover')) this._resume();
       }, 10000);
     }
   }
 
-  _startAutoplay() {
+  // ── Autoplay lifecycle ───────────────────────────────────────────────────
+
+  /** Start a fresh slide timer (for the current slide) from 0. */
+  _startSlideTimer() {
     if (this.slides.length <= 1) return;
-    this._stopAutoplay();
-    this._startProgressAnimation(this.currentIndex);
-    this.timer = setInterval(() => {
+    clearTimeout(this._slideTimer ?? undefined);
+    this._slideStartTime = Date.now();
+    this._elapsed        = 0;
+    this._paused         = false;
+    this._startProgressAnimation();
+    this._slideTimer = setTimeout(() => {
       const next = (this.currentIndex + 1) % this.slides.length;
       this._goTo(next);
-      this._startProgressAnimation(next);
+      this._startSlideTimer();
     }, this.autoplaySpeed);
   }
 
-  _stopAutoplay() {
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
-    if (this._resumeTimer !== null) {
-      clearTimeout(this._resumeTimer);
-      this._resumeTimer = null;
-    }
-    this._stopProgressAnimation();
+  /** Pause: freeze the progress bar and save how far through we are. */
+  _pause() {
+    if (this._paused || this.slides.length <= 1) return;
+    this._paused  = true;
+    this._elapsed = Date.now() - this._slideStartTime;
+    clearTimeout(this._slideTimer ?? undefined);
+    this._slideTimer = null;
+    this._setProgressPlayState('paused');
   }
 
-  /** Restart the fill animation on the active tab bar and the mobile progress bar. */
-  _startProgressAnimation(/** @type {number} */ _index) {
-    // Desktop tab fills — force a reflow to restart the CSS animation on the active tab.
+  /** Resume: continue the progress bar from where it was paused. */
+  _resume() {
+    if (!this._paused || this.slides.length <= 1) return;
+    this._paused = false;
+    const remaining = Math.max(0, this.autoplaySpeed - this._elapsed);
+    this._slideStartTime = Date.now() - this._elapsed;
+    this._setProgressPlayState('running');
+    this._slideTimer = setTimeout(() => {
+      const next = (this.currentIndex + 1) % this.slides.length;
+      this._goTo(next);
+      this._startSlideTimer();
+    }, remaining);
+  }
+
+  // ── Progress animation helpers ───────────────────────────────────────────
+
+  /** Restart the fill animation from 0 on all fills. */
+  _startProgressAnimation() {
     this.tabs.forEach((tab) => {
       const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));
       if (!fill) return;
-      fill.style.animation = 'none';
+      fill.style.animation          = 'none';
+      fill.style.animationPlayState = '';
       void fill.offsetWidth;
       fill.style.animation = '';
     });
 
-    // Mobile progress bar — use is-playing class so CSS controls the animation declaration.
     if (this.mobileProgressFill) {
       this.mobileProgressFill.classList.remove('is-playing');
+      this.mobileProgressFill.style.animationPlayState = '';
       void this.mobileProgressFill.offsetWidth;
       this.mobileProgressFill.classList.add('is-playing');
+      this.mobileProgressFill.style.animationPlayState = 'running';
     }
   }
 
-  /** Clear all progress animations. */
-  _stopProgressAnimation() {
+  /** Reset all progress fills back to 0 (used when the user manually picks a slide). */
+  _resetProgressToZero() {
     this.tabs.forEach((tab) => {
       const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));
-      if (fill) fill.style.animation = 'none';
+      if (!fill) return;
+      fill.style.animation          = 'none';
+      fill.style.animationPlayState = '';
     });
+
     if (this.mobileProgressFill) {
       this.mobileProgressFill.classList.remove('is-playing');
+      this.mobileProgressFill.style.animationPlayState = '';
+    }
+  }
+
+  /**
+   * Set `animation-play-state` on all fill elements.
+   * @param {'running'|'paused'} state
+   */
+  _setProgressPlayState(state) {
+    this.tabs.forEach((tab) => {
+      const fill = /** @type {HTMLElement|null} */ (tab.querySelector('.collection-showcase__tab-bar-fill'));
+      if (fill) fill.style.animationPlayState = state;
+    });
+    if (this.mobileProgressFill) {
+      this.mobileProgressFill.style.animationPlayState = state;
     }
   }
 }
