@@ -583,7 +583,6 @@
         "cutout_size": 40,
         "content_bottom_offset": 40,
         "content_gap": 16,
-        "mobile_content_layout": "stacked",
         "autoplay_speed": 5,
         "tab_bar_height": 2,
         "tab_inactive_opacity": 25,
